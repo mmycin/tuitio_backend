@@ -1,8 +1,19 @@
 #include <iostream>
-#include "utils/env.hpp"
+#include "utils/bearer_token.hpp"
 
 int main() 
 {
-	cout << getEnv("SECRET_KEY") << endl;
+	AuthManager auth;
+	string token = auth.make_token(123);
+
+	cout << token << endl;
+
+	optional<AuthManager::Id> id = auth.get_id(token);
+	if(!id) {
+		cout << "Id not fetched" << endl;
+	}
+
+	cout << *id << endl;
+	
 	return 0;
 }

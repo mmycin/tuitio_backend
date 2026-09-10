@@ -14,12 +14,19 @@ target_include_directories(httplib
 # -------------------------
 
 set(AES_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(AES_CPP_ENABLE_AESNI ON CACHE BOOL "" FORCE)
 
 add_subdirectory(
     thirdparty/aes-cpp
+    ${CMAKE_BINARY_DIR}/aes-cpp
 )
 
-
+target_compile_options(aes_cpp PRIVATE
+    -maes
+    -mpclmul
+    -msse2
+    -mssse3
+)
 
 # -------------------------
 # dotenv-cpp
