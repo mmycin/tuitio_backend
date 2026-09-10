@@ -1,5 +1,13 @@
 all: build run
 
+set dotenv-load := true
+
+makemigration name:
+    @atlas migrate diff {{name}} --env local
+
+migrate:
+    @atlas migrate apply --env local
+
 makeBuild:
 	@cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++
 
@@ -11,12 +19,6 @@ run:
 
 test:
 	@./bin/test.exe
-
-makemigration name="$(date +%s)":
-	@atlas migrate diff {{name}} --env local
-
-migrate:
-    atlas migrate diff --env local
 
 erd:
 	@atlas schema inspect --url "sqlite://app.db" -w 
