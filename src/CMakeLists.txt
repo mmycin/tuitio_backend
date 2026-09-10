@@ -1,4 +1,5 @@
 add_subdirectory(database)
+add_subdirectory(models)
 
 file(GLOB_RECURSE SERVER_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
