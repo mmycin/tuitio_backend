@@ -14,6 +14,9 @@ makeBuild:
 build:
 	@cmake --build build
 
+build-seeder:
+	@cmake --build build --target seeder
+
 run:
 	@./bin/server.exe
 
