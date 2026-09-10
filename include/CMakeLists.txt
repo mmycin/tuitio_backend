@@ -9,6 +9,17 @@ target_include_directories(httplib
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
 )
 
+# -------------------------
+# AES
+# -------------------------
+
+set(AES_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+    thirdparty/aes-cpp
+)
+
+
 
 # -------------------------
 # dotenv-cpp
@@ -19,6 +30,7 @@ add_library(dotenv INTERFACE)
 target_include_directories(dotenv
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dotenv-cpp/include/laserpants/dotenv
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dotenv-cpp/include
 )
 
 
@@ -43,6 +55,11 @@ add_library(utils INTERFACE)
 target_include_directories(utils
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/utils
+)
+
+target_link_libraries(utils
+    INTERFACE
+        dotenv
 )
 
 
@@ -71,4 +88,5 @@ target_link_libraries(cweb_dependencies
         nlohmann_json
         dotenv
         SQLiteCpp
+        aes_cpp::aes_cpp
 )

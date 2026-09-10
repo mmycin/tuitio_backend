@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include "env.hpp"
 
 using namespace std;
 
@@ -20,6 +21,8 @@ public:
 
     for (auto &b : bytes)
       b = static_cast<unsigned char>(rd());
+
+    string secret = getEnv("SECRET_KEY");
 
     static constexpr char hex[] = "0123456789abcdef";
 
