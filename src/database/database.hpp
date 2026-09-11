@@ -12,8 +12,8 @@ inline SQLite::Database& getDB()
 
     if (!db) {
         db = std::make_unique<SQLite::Database>(
-            getEnv("DB_FILENAME"),
-            SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE
+            getEnv("DB_FILENAME")
+            // SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE
         );
     }
 

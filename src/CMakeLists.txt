@@ -5,6 +5,10 @@ file(GLOB_RECURSE SERVER_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
+list(FILTER SERVER_SOURCES EXCLUDE REGEX
+    ".*/database/seeders/seeder\\.cpp$"
+)
+
 add_executable(server
     ${SERVER_SOURCES}
 )

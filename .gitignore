@@ -5,3 +5,6 @@ build/
 .env
 *.db
 *.sum
+
+cmake-build-debug
+.idea
