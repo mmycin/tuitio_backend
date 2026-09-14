@@ -2,18 +2,16 @@
 #include <SQLiteCpp/Statement.h>
 #include <iostream>
 
-using namespace std;
-
 int main()
 {
     try {
         auto &db = getDB();
 
         SQLite::Statement query(db, R"SQL(
-	    SELECT id, name, email
-	    FROM users
-	    WHERE id = ?;
-    )SQL");
+		    SELECT id, name, email
+		    FROM users
+		    WHERE id = ?;
+        )SQL");
         query.bind(1, 15);
 
         while (query.executeStep()) {
