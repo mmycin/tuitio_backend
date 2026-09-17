@@ -1,0 +1,13 @@
+table "{{name}}" {
+	schema = schema.main
+
+	column "id" {
+		type = integer
+		null = false
+		auto_increment = true
+	}
+
+	primary_key {
+		columns = [column.id]
+	}
+}

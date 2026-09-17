@@ -1,0 +1,16 @@
+#pragma once
+
+#include <string>
+
+using namespace std;
+
+class {{className}} {
+	public:
+		int id;
+
+		{{className}}(int id) : id(id) {}
+
+		inline string getName() {
+			return string("{{className}}:\n\t") + "Id: " + to_string(this->id) + "\n\t"; 
+		}
+};
