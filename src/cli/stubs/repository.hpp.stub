@@ -1,9 +1,7 @@
 #pragma once
 
-#include "models/{{name}}_model.hpp"
 #include <SQLiteCpp/Statement.h>
 #include "repositories/repository.hpp"
-#include <iostream>
 
 using namespace std;
 
