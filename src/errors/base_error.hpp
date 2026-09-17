@@ -19,4 +19,14 @@ class AppException : public std::runtime_error {
     int getStatusCode() const {
         return statusCode;
     }
+
+    virtual nlohmann::json toJson() const {
+        nlohmann::json json;
+        json["status"] = statusCode;
+        json["error"] = what();
+        if (!details.is_null()) {
+            json["details"] = details;
+        }
+        return json;
+    }
 };
