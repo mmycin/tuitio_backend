@@ -1,0 +1,16 @@
+#pragma once
+
+#include <memory>
+#include "repositories/{{name}}_repository.hpp"
+#include "models/{{name}}_model.hpp"
+#include "services/service.hpp"
+
+class {{className}}Service : public IService {
+public:
+    explicit {{className}}Service(std::unique_ptr<{{className}}Repository> repo)
+        : repo(std::move(repo)) {}
+
+
+private:
+    std::unique_ptr<{{className}}Repository> repo;
+};

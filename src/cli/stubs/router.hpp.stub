@@ -1,0 +1,16 @@
+#pragma once
+
+#include "routers/router.hpp"
+#include "controllers/{{name}}_controller.hpp"
+
+class {{className}}Router : public IRouter {
+private:
+    {{className}}Controller &controller;
+
+public:
+    explicit {{className}}Router({{className}}Controller &controller) : controller(controller) {}
+
+    void registerRoutes(httplib::Server &server) {
+        registerResource(server, "/{{pluralName}}", controller);
+    }
+};

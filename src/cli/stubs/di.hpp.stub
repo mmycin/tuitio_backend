@@ -1,0 +1,44 @@
+#pragma once
+
+#include <memory>
+#include "di/di.hpp"
+#include "repositories/{{name}}_repository.hpp"
+#include "services/{{name}}_service.hpp"
+#include "controllers/{{name}}_controller.hpp"
+#include "routers/{{name}}_router.hpp"
+
+class {{className}}DI : public IDI {
+private:
+    std::unique_ptr<{{className}}Repository> repo;
+    std::unique_ptr<{{className}}Service> service;
+    std::unique_ptr<{{className}}Controller> controller;
+    std::unique_ptr<{{className}}Router> router;
+
+public:
+    {{className}}DI() {
+        repo = std::make_unique<{{className}}Repository>();
+        service = std::make_unique<{{className}}Service>(std::move(repo));
+        controller = std::make_unique<{{className}}Controller>(std::move(service));
+        router = std::make_unique<{{className}}Router>(*controller);
+    }
+
+    void registerRoutes(httplib::Server &server) override {
+        router->registerRoutes(server);
+    }
+
+    IController& getController() override {
+        return *controller;
+    }
+
+    IService& getService() override {
+        return *service;
+    }
+
+    IRepository& getRepository() override {
+        return *repo;
+    }
+
+    IRouter& getRouter() override {
+        return *router;
+    }
+};

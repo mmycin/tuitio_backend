@@ -1,0 +1,38 @@
+#pragma once
+
+#include "controllers/controller.hpp"
+#include "services/{{name}}_service.hpp"
+#include <httplib.h>
+#include <memory>
+#include <string>
+
+using namespace std;
+
+class {{className}}Controller : public IController {
+private:
+    std::unique_ptr<{{className}}Service> service;
+
+public:
+    explicit {{className}}Controller(std::unique_ptr<{{className}}Service> service)
+        : service(std::move(service)) {}
+
+    void index(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+
+    void show(const httplib::Request &req, httplib::Response &res) override {
+     	sendError(res, 405, "Method not allowed");
+    }
+
+    void create(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+
+    void update(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+
+    void destroy(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+};

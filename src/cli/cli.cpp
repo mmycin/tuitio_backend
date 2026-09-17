@@ -8,6 +8,7 @@
 #include "commands/command.hpp"
 #include "commands/make_schema.hpp"
 #include "commands/seeder.hpp"
+#include "commands/make_resources.hpp"
 
 
 int main(int argc, char *argv[]) {
@@ -15,13 +16,10 @@ int main(int argc, char *argv[]) {
     try {
         spdlog::info("CLI starting up...");
 
-        // Global option for environment configuration path
         std::string env_file = ".env";
         app.add_option("-e,--env", env_file, "Path to .env file")
             ->default_str(".env");
 
-        // Create the parent "make" subcommand group first so generators can
-        // hook into it
         app.add_subcommand("make",
                            "Scaffold project components and code generators");
 
@@ -29,6 +27,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::unique_ptr<ICommand>> commands;
         commands.push_back(std::make_unique<SeederCommand>());
         commands.push_back(std::make_unique<MakeSchemaCommand>());
+        commands.push_back(std::make_unique<MakeResourcesCommand>());
 
         for (const auto &cmd : commands) {
             cmd->register_command(app);
@@ -36,7 +35,6 @@ int main(int argc, char *argv[]) {
 
         app.parse(argc, argv);
 
-        // Initialize environment variables globally after parsing inputs
         dotenv::init(env_file.c_str());
     } catch (const CLI::ParseError &e) {
         int code = app.exit(e);
