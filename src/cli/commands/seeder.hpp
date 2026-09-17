@@ -1,5 +1,6 @@
 #pragma once
 
+#include "command.hpp"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -7,55 +8,59 @@
 #include <spdlog/spdlog.h>
 #include <SQLiteCpp/SQLiteCpp.h>
 
-inline std::string read_seeder_file(const std::string& filename) {
-    std::ifstream file(filename);
+class SeederCommand : public ICommand {
+public:
+    void register_command(CLI::App& app) override {
+        auto* seed_cmd = app.add_subcommand("seed", "Run a database seeder script");
+        
+        // Bind option to member variable
+        seed_cmd->add_option("-f,--file", seeder_file_, "Path to seeder SQL file")->required();
 
-    if (!file) {
-        throw std::runtime_error("Unable to open seeder file: " + filename);
+        // Bind the execution lifecycle to CLI11's callback
+        seed_cmd->callback([this]() {
+            this->execute();
+        });
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
+private:
+    std::string seeder_file_;
 
-inline int run_seeder(const std::string& seeder_file) {
-    const char* env_db = std::getenv("DB_FILENAME");
-    std::string db_filename = env_db ? env_db : "";
+    void execute() {
+        const char* env_db = std::getenv("DB_FILENAME");
+        std::string db_filename = env_db ? env_db : "";
 
-    if (db_filename.empty()) {
-        spdlog::error("DB_FILENAME is not set in .env");
-        return 1;
+        if (db_filename.empty()) {
+            spdlog::error("DB_FILENAME is not set in .env");
+            std::exit(1);
+        }
+
+        std::ifstream file(seeder_file_);
+        if (!file) {
+            spdlog::error("Unable to open seeder file: {}", seeder_file_);
+            std::exit(1);
+        }
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+
+        try {
+            SQLite::Database db(db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+            SQLite::Transaction transaction(db);
+
+            db.exec(buffer.str());
+            transaction.commit();
+
+            spdlog::info("Seeder completed successfully.");
+            spdlog::info("Database: {}", db_filename);
+            spdlog::info("Seeder:   {}", seeder_file_);
+        }
+        catch (const SQLite::Exception& e) {
+            spdlog::error("Seeder failed (SQLite error): {}", e.what());
+            std::exit(1);
+        }
+        catch (const std::exception& e) {
+            spdlog::error("Seeder failed (Standard error): {}", e.what());
+            std::exit(1);
+        }
     }
-
-    std::string sql;
-    try {
-        sql = read_seeder_file(seeder_file);
-    }
-    catch (const std::exception& e) {
-        spdlog::error("{}", e.what());
-        return 1;
-    }
-
-    try {
-        SQLite::Database db(db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        SQLite::Transaction transaction(db);
-
-        db.exec(sql);
-        transaction.commit();
-
-        spdlog::info("Seeder completed successfully.");
-        spdlog::info("Database: {}", db_filename);
-        spdlog::info("Seeder:   {}", seeder_file);
-    }
-    catch (const SQLite::Exception& e) {
-        spdlog::error("Seeder failed (SQLite error): {}", e.what());
-        return 1;
-    }
-    catch (const std::exception& e) {
-        spdlog::error("Seeder failed (Standard error): {}", e.what());
-        return 1;
-    }
-
-    return 0;
-}
+};

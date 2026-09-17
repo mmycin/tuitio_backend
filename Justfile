@@ -32,6 +32,9 @@ replicate:
 restore:
 	@litestream restore -config litestream.yml "$DB_FILENAME"
 
+cli *args:
+    ./bin/cli.exe {{args}}
+
 clean:
 	@rm -rf build
 	@rm -rf bin
