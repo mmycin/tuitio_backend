@@ -83,6 +83,20 @@ add_subdirectory(thirdparty/SQLiteCpp)
 
 
 # -------------------------
+# spdlog
+# -------------------------
+
+set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+    thirdparty/spdlog
+    ${CMAKE_BINARY_DIR}/spdlog
+)
+
+
+# -------------------------
 # Everything
 # -------------------------
 
@@ -96,4 +110,5 @@ target_link_libraries(cweb_dependencies
         dotenv
         SQLiteCpp
         aes_cpp::aes_cpp
+        spdlog::spdlog
 )
