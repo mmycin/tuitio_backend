@@ -1,8 +1,11 @@
 #include "kernel.hpp"
+#include <dotenv.h>
+
 
 int main() {
-	AppContainer app;
-	app.start("0.0.0.0", 5000);
+    dotenv::init();
+    AppContainer app;
+    app.start("0.0.0.0", 5000);
 
-	return 0;
+    return 0;
 }
