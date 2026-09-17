@@ -1,28 +1,38 @@
 #pragma once
 
+#include "di/user_di.hpp"
 #include <httplib.h>
 #include <iostream>
-#include "di/user_di.hpp"
-#include "routers/user_router.hpp"
 
-using namespace std;
+#include "di/user_di.hpp"
+#include <httplib.h>
+#include <iostream>
 
 class AppContainer {
-	private:
-		httplib::Server server;
+  private:
+    httplib::Server server;
 
-		UserDI userDi;
+    std::vector<std::unique_ptr<IDI>> modules;
 
-		void setUpRoutes() {
-			registerUserRoutes(server, *userDi.controller);
-		}
-	public:
-		AppContainer() {
-			setUpRoutes();
-		}
+    void initializeModules() {
+        modules.push_back(std::make_unique<UserDI>());
+        // modules.push_back(std::make_unique<PostDI>());
+    }
 
-		void start(const string& host, int port) {
-			cout << "Server started at port " << port << endl;
-			server.listen(host, port);
-		}
+    void setupRoutes() {
+        for (auto &module : modules) {
+            module->registerRoutes(server);
+        }
+    }
+
+  public:
+    AppContainer() {
+        initializeModules();
+        setupRoutes();
+    }
+
+    void start(const std::string &host, int port) {
+        std::cout << "Server started at port: " << port << std::endl;
+        server.listen(host, port);
+    }
 };

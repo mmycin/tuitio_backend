@@ -1,10 +1,16 @@
 #pragma once
 
-#include <httplib.h>
+#include "routers/router.hpp"
 #include "controllers/user_controller.hpp"
 
-inline void registerUserRoutes(httplib::Server &server, UserController &controller) {
-	server.Get(R"(/user/(\d+))", [&controller](const httplib::Request &req, httplib::Response &res) {
-        controller.show(req, res);
-    });
-}
+class UserRouter : public IRouter {
+private:
+    UserController &controller;
+
+public:
+    explicit UserRouter(UserController &controller) : controller(controller) {}
+
+    void registerRoutes(httplib::Server &server) {
+        registerResource(server, "/users", controller);
+    }
+};

@@ -1,23 +1,27 @@
 #pragma once
 
-#include <memory>
-#include <httplib.h>
-#include "nlohmann/json.hpp"
-#include "services/user_service.hpp"
+#include "controllers/controller.hpp"
 #include "dtos/user_dto.hpp"
+#include "services/user_service.hpp"
+#include <httplib.h>
+#include <memory>
 #include <string>
 
 using namespace std;
 
-class UserController {
-private:
+class UserController : public IController {
+  private:
     std::unique_ptr<UserService> service;
 
-public:
-    explicit UserController(std::unique_ptr<UserService> service) 
+  public:
+    explicit UserController(std::unique_ptr<UserService> service)
         : service(std::move(service)) {}
 
-    void show(const httplib::Request &req, httplib::Response &res) {
+    void index(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+
+    void show(const httplib::Request &req, httplib::Response &res) override {
         try {
             string id_str = req.matches[1];
             int userId = std::stoi(id_str);
@@ -25,17 +29,20 @@ public:
             auto user = service->getUserById(userId);
             auto user_dao = GetUserResponse::fromUser(user);
 
-            nlohmann::json response;
-            response["status"] = 200;
-            response["user"] = user_dao.toJson();
-
-            res.set_content(response.dump(), "application/json");
+            sendJson(res, 200, user_dao.toJson());
         } catch (const exception &e) {
-            nlohmann::json error;
-            error["status"] = 400;
-            error["error"] = e.what();
-            res.status = 400;
-            res.set_content(error.dump(), "application/json");
+            sendError(res, 400, e.what());
         }
+    }
+
+    void create(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+    
+    void update(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
+    }
+    void destroy(const httplib::Request &req, httplib::Response &res) override {
+        sendError(res, 405, "Method not allowed");
     }
 };

@@ -4,18 +4,15 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "models/user_model.hpp"
+#include "dtos/dto.hpp"
 
 using namespace std;
 
-class IUserDTO {
+class IUserDTO : public IDTO {
 public:
     int id;
     string name;
     string email;
-
-    virtual void validate() = 0;
-    virtual nlohmann::json toJson() = 0;
-    virtual ~IUserDTO() = default;
 };
 
 class GetUserResponse : public IUserDTO {

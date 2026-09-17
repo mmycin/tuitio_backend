@@ -1,2 +1,2 @@
-GET http://localhost:5000/user/4
+GET http://localhost:5000/users/4
 HTTP 200

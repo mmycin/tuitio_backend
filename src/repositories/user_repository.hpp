@@ -1,22 +1,21 @@
 #pragma once
 
-#include "SQLiteCpp/Database.h"
-#include "database/database.hpp"
 #include "models/user_model.hpp"
 #include <SQLiteCpp/Statement.h>
+#include "repositories/repository.hpp"
+#include <iostream>
 
-class UserRepository {
-  private:
-    SQLite::Database &db = getDB();
+using namespace std;
 
-  public:
+class UserRepository : public IRepository {
+public:
     User getUserById(int id) {
         User user(id);
         SQLite::Statement query(this->db, R"SQL(
-        	SELECT name, email
-         	FROM users
-          	WHERE id = ?;
-		)SQL");
+            SELECT name, email
+            FROM users
+            WHERE id = ?;
+        )SQL");
         query.bind(1, id);
 
         try {
