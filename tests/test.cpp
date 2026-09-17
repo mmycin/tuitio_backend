@@ -1,16 +1,15 @@
 #include <iostream>
-#include <models/user_model.hpp>
-#include <models/todo_model.hpp>
+#include "models/user_model.hpp"
+#include "repositories/user_repository.hpp"
+
 
 using namespace std;
 
-int main()
+int main() 
 {
-	User u(1, "Mycin", "mycin.mit@gmail.com", "123");
-	Todo t(1, u, "Brush", "Brush your teeth", false);
+	UserRepository repo;
+	User u = repo.getUserById(4);
 
 	cout << u.getUser() << endl;
-
-	cout << t.getTodo() << endl;
     return 0;
 }
