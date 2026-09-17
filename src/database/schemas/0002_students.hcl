@@ -1,4 +1,4 @@
-table "todos" {
+table "students" {
 	schema = schema.main
 
 	column "id" {
@@ -12,26 +12,21 @@ table "todos" {
 		null = false
 	}
 
-	column "title" {
+	column "name" {
 		type = text
 		null = false
 	}
 
-	column "description" {
-		type = text
-	}
-
-	column "completed" {
-		type = bool
+	column "fee" {
+		type = integer
 		null = false
-		default = false
 	}
 
 	primary_key {
 		columns = [column.id]
 	}
 
-	foreign_key "todos_user_fk" {
+	foreign_key "students_user_fk" {
 		columns = [column.user_id]
 		ref_columns = [table.users.column.id]
 
@@ -39,7 +34,7 @@ table "todos" {
 		on_delete = CASCADE
 	}
 
-	index "todos_user_id_idx" {
+	index "students_user_id_idx" {
 		columns = [column.user_id]
 	}
 }
