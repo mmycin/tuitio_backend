@@ -1,4 +1,4 @@
-all: build run
+all: build serve
 
 set dotenv-load := true
 
@@ -17,7 +17,7 @@ build:
 build-seeder:
 	@cmake --build build --target seeder
 
-run:
+serve:
 	@./bin/server.exe
 
 test:
