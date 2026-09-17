@@ -1,24 +1,25 @@
-#include <sqlite3.h>
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstdlib>
+#include <spdlog/spdlog.h>
+#include <SQLiteCpp/SQLiteCpp.h>
+#include <dotenv.h>
 
-#include "utils/env.hpp"
 
 struct Arguments {
     std::string file;
 };
 
 void print_usage(const char* program) {
-    std::cerr
+    std::cout
         << "Usage: " << program
         << " --file <seeder.sql>\n\n"
         << "DB file is read from DB_FILENAME in .env\n\n"
         << "Example:\n"
         << "  " << program
-        << " --file src/database/seeds/dev.sql\n";
+        << " --file src/database/seeders/user_seeder.sql\n";
 }
 
 bool parse_arguments(int argc, char* argv[], Arguments& args) {
@@ -27,10 +28,9 @@ bool parse_arguments(int argc, char* argv[], Arguments& args) {
 
         if (arg == "--file") {
             if (i + 1 >= argc) {
-                std::cerr << "Error: --file requires a value\n";
+                spdlog::error("--file requires a value");
                 return false;
             }
-
             args.file = argv[++i];
         }
         else if (arg == "--help" || arg == "-h") {
@@ -38,13 +38,13 @@ bool parse_arguments(int argc, char* argv[], Arguments& args) {
             std::exit(0);
         }
         else {
-            std::cerr << "Error: unknown argument: " << arg << "\n";
+            spdlog::error("Unknown argument: {}", arg);
             return false;
         }
     }
 
     if (args.file.empty()) {
-        std::cerr << "Error: --file is required\n";
+        spdlog::error("--file is required");
         return false;
     }
 
@@ -55,18 +55,18 @@ std::string read_file(const std::string& filename) {
     std::ifstream file(filename);
 
     if (!file) {
-        throw std::runtime_error(
-            "Unable to open seeder file: " + filename
-        );
+        throw std::runtime_error("Unable to open seeder file: " + filename);
     }
 
     std::stringstream buffer;
     buffer << file.rdbuf();
-
     return buffer.str();
 }
 
 int main(int argc, char* argv[]) {
+    // 1. Initialize dotenv first so environment variables load into the process
+    dotenv::init(".env");
+
     Arguments args;
 
     if (!parse_arguments(argc, argv, args)) {
@@ -74,127 +74,50 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Read DB filename from .env
-    std::string db_filename = getEnv("DB_FILENAME");
+    // 2. Read DB filename directly from the loaded environment variables
+    const char* env_db = std::getenv("DB_FILENAME");
+    std::string db_filename = env_db ? env_db : "";
 
     if (db_filename.empty()) {
-        std::cerr << "Error: DB_FILENAME is not set in .env\n";
+        spdlog::error("DB_FILENAME is not set in .env");
         return 1;
     }
 
-    // Read SQL file.
+    // Read SQL file contents
     std::string sql;
-
     try {
         sql = read_file(args.file);
     }
     catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
+        spdlog::error("{}", e.what());
         return 1;
     }
 
-    // Open database.
-    sqlite3* db = nullptr;
+    try {
+        // Open database safely using SQLiteCpp (handles resource release via RAII)
+        SQLite::Database db(db_filename, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
-    int rc = sqlite3_open(db_filename.c_str(), &db);
+        // Start transaction using SQLiteCpp's RAII Transaction wrapper
+        SQLite::Transaction transaction(db);
 
-    if (rc != SQLITE_OK) {
-        std::cerr
-            << "Error: unable to open database '"
-            << db_filename
-            << "': "
-            << sqlite3_errmsg(db)
-            << "\n";
+        // Execute the entire SQL seed script
+        db.exec(sql);
 
-        sqlite3_close(db);
+        // Commit transaction
+        transaction.commit();
+
+        spdlog::info("Seeder completed successfully.");
+        spdlog::info("Database: {}", db_filename);
+        spdlog::info("Seeder:   {}", args.file);
+    }
+    catch (const SQLite::Exception& e) {
+        spdlog::error("Seeder failed (SQLite error): {}", e.what());
         return 1;
     }
-
-    // Start transaction.
-    char* error_message = nullptr;
-
-    rc = sqlite3_exec(
-        db,
-        "BEGIN TRANSACTION;",
-        nullptr,
-        nullptr,
-        &error_message
-    );
-
-    if (rc != SQLITE_OK) {
-        std::cerr
-            << "Error starting transaction: "
-            << error_message
-            << "\n";
-
-        sqlite3_free(error_message);
-        sqlite3_close(db);
+    catch (const std::exception& e) {
+        spdlog::error("Seeder failed (Standard error): {}", e.what());
         return 1;
     }
-
-    // Execute seed SQL.
-    rc = sqlite3_exec(
-        db,
-        sql.c_str(),
-        nullptr,
-        nullptr,
-        &error_message
-    );
-
-    if (rc != SQLITE_OK) {
-        std::cerr
-            << "Seeder failed: "
-            << error_message
-            << "\n";
-
-        sqlite3_free(error_message);
-
-        sqlite3_exec(
-            db,
-            "ROLLBACK;",
-            nullptr,
-            nullptr,
-            nullptr
-        );
-
-        sqlite3_close(db);
-        return 1;
-    }
-
-    // Commit.
-    rc = sqlite3_exec(
-        db,
-        "COMMIT;",
-        nullptr,
-        nullptr,
-        &error_message
-    );
-
-    if (rc != SQLITE_OK) {
-        std::cerr
-            << "Error committing transaction: "
-            << error_message
-            << "\n";
-
-        sqlite3_free(error_message);
-        sqlite3_exec(
-            db,
-            "ROLLBACK;",
-            nullptr,
-            nullptr,
-            nullptr
-        );
-
-        sqlite3_close(db);
-        return 1;
-    }
-
-    sqlite3_close(db);
-
-    std::cout
-        << "Seeder completed successfully.\n"
-        << "Database: " << db_filename << "\n"
-        << "Seeder:   " << args.file << "\n";
 
     return 0;
 }
