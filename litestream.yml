@@ -1,0 +1,8 @@
+dbs:
+  - path: ${DB_FILENAME}
+    replicas:
+      - url: ${DB_REPLICA_URL}
+        endpoint: ${DB_REPLICA_ENDPOINT}
+        access-key-id: ${DB_REPLICA_ACCESS_KEY}
+        secret-access-key: ${DB_REPLICA_SECRET_KEY}
+        force-path-style: ${DB_REPLICA_FORCE_PATH_STYLE}

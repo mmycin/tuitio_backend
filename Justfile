@@ -3,10 +3,10 @@ all: build serve
 set dotenv-load := true
 
 makemigration name:
-    @atlas migrate diff {{name}} --env local
+	@atlas migrate diff {{name}} --env local
 
 migrate:
-    @atlas migrate apply --env local
+	@atlas migrate apply --env local
 
 makeBuild:
 	@cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++
@@ -25,6 +25,12 @@ test:
 
 erd:
 	@atlas schema inspect --url "sqlite://app.db" -w 
+
+replicate:
+	@litestream replicate -config litestream.yml
+
+restore:
+	@litestream restore -config litestream.yml "$DB_FILENAME"
 
 clean:
 	@rm -rf build
