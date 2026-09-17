@@ -24,9 +24,8 @@ file(GLOB_RECURSE SERVER_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
 
-# Exclude standalone executable source files like seeders
 list(FILTER SERVER_SOURCES EXCLUDE REGEX
-    ".*/database/seeders/seeder\\.cpp$"
+    ".*/cli/cli\\.cpp$"
 )
 
 add_executable(server
@@ -45,19 +44,19 @@ target_link_libraries(server
 )
 
 # -----------------------------------------------------------------------------
-# Database Seeder Executable
+# CLI Executable (CLI11)
 # -----------------------------------------------------------------------------
-add_executable(seeder
-    src/database/seeders/seeder.cpp
+add_executable(cli
+    src/cli/cli.cpp
 )
 
-target_include_directories(seeder
+target_include_directories(cli
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/include
 )
 
-target_link_libraries(seeder
+target_link_libraries(cli
     PRIVATE
         cweb_dependencies
 )
@@ -66,4 +65,3 @@ target_link_libraries(seeder
 # Tests
 # -----------------------------------------------------------------------------
 add_subdirectory(tests)
-

@@ -95,6 +95,19 @@ add_subdirectory(
     ${CMAKE_BINARY_DIR}/spdlog
 )
 
+# -------------------------
+# CLI11
+# -------------------------
+
+set(CLI11LOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(CLI11LOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CLI11LOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+    thirdparty/CLI11
+    ${CMAKE_BINARY_DIR}/CLI11
+)
+
 
 # -------------------------
 # Everything
@@ -111,4 +124,5 @@ target_link_libraries(cweb_dependencies
         SQLiteCpp
         aes_cpp::aes_cpp
         spdlog::spdlog
+        CLI11::CLI11
 )
