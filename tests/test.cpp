@@ -1,15 +1,19 @@
+#include "utils/bearer_token.hpp"
 #include <iostream>
-#include "models/user_model.hpp"
-#include "repositories/user_repository.hpp"
 
-
-using namespace std;
-
-int main() 
+int main()
 {
-	UserRepository repo;
-	User u = repo.getUserById(4);
+    AuthManager auth;
+    string token = auth.make_token(123);
 
-	cout << u.getUser() << endl;
+    cout << token << endl;
+
+    optional<AuthManager::Id> id = auth.get_id(token);
+    if (!id) {
+        cout << "Id not fetched" << endl;
+    }
+
+    cout << *id << endl;
+
     return 0;
 }

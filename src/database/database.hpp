@@ -3,8 +3,7 @@
 #include <memory>
 
 #include <SQLiteCpp/SQLiteCpp.h>
-
-#include "utils/env.hpp"
+#include "configs/db_config.hpp"
 
 inline SQLite::Database& getDB()
 {
@@ -12,8 +11,7 @@ inline SQLite::Database& getDB()
 
     if (!db) {
         db = std::make_unique<SQLite::Database>(
-            getEnv("DB_FILENAME")
-            // SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE
+            DBConfig::DB_FILENAME
         );
     }
 
