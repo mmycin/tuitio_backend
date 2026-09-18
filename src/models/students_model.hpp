@@ -7,7 +7,7 @@ using namespace std;
 
 class Student {
 	public:
-		int id;
+		int id = 0;
 		User user;
 		string name;
 		int fee;

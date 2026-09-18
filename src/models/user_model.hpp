@@ -6,19 +6,17 @@ using namespace std;
 
 class User {
   public:
-    int id;
+    int id = 0;
     string name;
     string email;
+    string password_hash;
 
     User(int id) : id(id) {}
 
-    User(int id, string name, string email, string password_hash)
-        : id(id), name(name), email(email), password_hash(password_hash) {}
+    User(string name, string email, string password_hash)
+        : name(name), email(email), password_hash(password_hash) {}
 
     string getUser();
-
-  private:
-    string password_hash;
 };
 
 inline string User::getUser() {
