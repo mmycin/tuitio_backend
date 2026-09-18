@@ -10,7 +10,6 @@
 #include <memory>
 #include <tuple>
 
-
 class AuthService : public IService {
   public:
     explicit AuthService(std::unique_ptr<UserRepository> repo,
@@ -46,11 +45,18 @@ class AuthService : public IService {
         }
 
         auto id = this->auth_manager->get_id(token);
-        if(!id) {
-        	return user;
+        if (!id) {
+            return user;
         }
 
         user = this->repo->getUserById(*id);
+        return user;
+    }
+
+    User signUp(string name, string email, string password) {
+        auto password_hash = PasswordHash::hash(password);
+
+        auto user = this->repo->createUser(User(name, email, password_hash));
         return user;
     }
 

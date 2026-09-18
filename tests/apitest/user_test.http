@@ -6,6 +6,15 @@
 #  "password": "12345678"
 #}
 
+#POST http://localhost:5000/auth/signup
+#Content-Type: application/json
+
+#{
+#	"name": "Tahcin Mycin",
+#	"email": "mycin@gmail.com",
+# 	"password": "12345678"
+#}
+
 
 GET http://localhost:5000/auth/me
 Content-Type: application/json

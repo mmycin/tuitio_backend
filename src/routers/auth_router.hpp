@@ -18,7 +18,7 @@ class AuthRouter : public IRouter {
             controller.login(req, res);
         });
 
-        server.Post("/auth/singup", [this](const httplib::Request &req,
+        server.Post("/auth/signup", [this](const httplib::Request &req,
                                            httplib::Response &res) {
             controller.signup(req, res);
         });

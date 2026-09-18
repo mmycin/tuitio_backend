@@ -29,7 +29,7 @@ class UserRepository : public IRepository {
         return user;
     }
 
-    void createUser(User user) {
+    User createUser(User user) {
         SQLite::Statement query(this->db, R"SQL(
         	INSERT INTO users
         	(name, email, password_hash)
@@ -52,6 +52,8 @@ class UserRepository : public IRepository {
         if (user.id == 0) {
             spdlog::error("User creation failed");
         }
+
+        return user;
     }
 
     User getUserByEmail(string email) {

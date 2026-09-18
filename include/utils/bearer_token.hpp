@@ -9,6 +9,7 @@
 #include <string_view>
 #include <vector>
 #include "configs/secret_config.hpp"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -82,6 +83,7 @@ public:
       ).count();
 
       if (now_epoch > exp_epoch) {
+      	spdlog::info("Session expired");
         return nullopt; // Token expired
       }
 
