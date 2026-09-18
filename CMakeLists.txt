@@ -61,6 +61,12 @@ target_link_libraries(cli
         cweb_dependencies
 )
 
+# Assuming your executable target is named 'server'
+target_compile_definitions(server PRIVATE 
+    $<$<CXX_COMPILER_ID:MSVC>:_HAS_STD_BYTE=0>
+)
+
+
 # -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------

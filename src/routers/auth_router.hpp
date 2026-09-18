@@ -22,5 +22,10 @@ class AuthRouter : public IRouter {
                                            httplib::Response &res) {
             controller.signup(req, res);
         });
+        
+        server.Get("/auth/me", [this](const httplib::Request &req,
+                                           httplib::Response &res) {
+            controller.verify(req, res);
+        });
     }
 };

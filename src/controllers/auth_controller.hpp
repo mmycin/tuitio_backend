@@ -2,11 +2,11 @@
 
 #include "controllers/controller.hpp"
 #include "dtos/auth_dto.hpp"
+#include "dtos/user_dto.hpp"
 #include "services/auth_service.hpp"
 #include <httplib.h>
 #include <memory>
 #include <string>
-
 
 using namespace std;
 using json = nlohmann::json;
@@ -57,4 +57,14 @@ class AuthController : public IController {
     }
 
     void signup(const httplib::Request &req, httplib::Response &res) {}
+
+    void verify(const httplib::Request &req, httplib::Response &res) {
+        auto user = this->service->verifyUser(req);
+
+        if (user.id == 0) {
+            sendError(res, 404, "User not found");
+        }
+        auto user_dto = GetUserResponse::fromUser(user);
+        sendJson(res, 200, user_dto.toJson());
+    }
 };
