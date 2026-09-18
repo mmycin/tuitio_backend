@@ -1,9 +1,7 @@
 # -------------------------
 # httplib
 # -------------------------
-
 add_library(httplib INTERFACE)
-
 target_include_directories(httplib
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
@@ -12,15 +10,12 @@ target_include_directories(httplib
 # -------------------------
 # AES
 # -------------------------
-
 set(AES_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(AES_CPP_ENABLE_AESNI ON CACHE BOOL "" FORCE)
-
 add_subdirectory(
     thirdparty/aes-cpp
     ${CMAKE_BINARY_DIR}/aes-cpp
 )
-
 target_compile_options(aes_cpp PRIVATE
     -maes
     -mpclmul
@@ -31,22 +26,17 @@ target_compile_options(aes_cpp PRIVATE
 # -------------------------
 # dotenv-cpp
 # -------------------------
-
 add_library(dotenv INTERFACE)
-
 target_include_directories(dotenv
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dotenv-cpp/include/laserpants/dotenv
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/dotenv-cpp/include
 )
 
-
 # -------------------------
 # nlohmann/json
 # -------------------------
-
 add_library(nlohmann_json INTERFACE)
-
 target_include_directories(nlohmann_json
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/json/single_include
@@ -56,40 +46,35 @@ target_include_directories(nlohmann_json
 # -------------------------
 # Project utilities
 # -------------------------
-
-add_library(utils INTERFACE)
+add_library(utils STATIC
+    "utils/utils.cpp"
+)
 
 target_include_directories(utils
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/utils
+    PUBLIC 
+        "${CMAKE_CURRENT_SOURCE_DIR}/utils"
 )
 
 target_link_libraries(utils
-    INTERFACE
+    PUBLIC
         dotenv
 )
-
 
 # -------------------------
 # SQLiteCpp
 # -------------------------
-
 set(SQLITECPP_RUN_CPPLINT OFF CACHE BOOL "" FORCE)
 set(SQLITECPP_RUN_CPPCHECK OFF CACHE BOOL "" FORCE)
 set(SQLITECPP_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(SQLITECPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-
 add_subdirectory(thirdparty/SQLiteCpp)
-
 
 # -------------------------
 # spdlog
 # -------------------------
-
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
-
 add_subdirectory(
     thirdparty/spdlog
     ${CMAKE_BINARY_DIR}/spdlog
@@ -98,21 +83,28 @@ add_subdirectory(
 # -------------------------
 # CLI11
 # -------------------------
-
 set(CLI11LOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(CLI11LOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(CLI11LOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
-
 add_subdirectory(
     thirdparty/CLI11
     ${CMAKE_BINARY_DIR}/CLI11
 )
 
+# -------------------------
+# Monocypher
+# -------------------------
+add_library(monocypher STATIC
+    thirdparty/monocypher/monocypher.c
+)
+target_include_directories(monocypher PUBLIC
+    thirdparty/monocypher
+)
+target_link_libraries(utils PUBLIC monocypher)
 
 # -------------------------
-# Everything
+# Everything Bundle
 # -------------------------
-
 add_library(cweb_dependencies INTERFACE)
 
 target_link_libraries(cweb_dependencies
@@ -125,4 +117,5 @@ target_link_libraries(cweb_dependencies
         aes_cpp::aes_cpp
         spdlog::spdlog
         CLI11::CLI11
+        monocypher
 )
