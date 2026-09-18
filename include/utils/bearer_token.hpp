@@ -1,6 +1,7 @@
 #pragma once
 
 #include <aes_cpp/aes.hpp>
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <random>
@@ -15,7 +16,7 @@ using namespace std;
 // Token format (URL-safe, dot-separated hex):
 //   <12-byte IV hex>.<ciphertext hex>.<16-byte GCM tag hex>
 //
-// Payload encrypted: decimal string of the user Id
+// Payload encrypted: "id:expiration_epoch_seconds"
 // Key: SECRET_KEY env var, zero-padded or truncated to 32 bytes (AES-256)
 // ---------------------------------------------------------------------------
 
@@ -23,12 +24,18 @@ class AuthManager {
 public:
   using Id = uint64_t;
 
-  // Generate a stateless AES-256-GCM token encoding the user id.
+  // Generate a stateless AES-256-GCM token encoding the user id and 3-hour expiry.
   string make_token(Id id) const {
     auto key = load_key();
     auto iv  = random_iv();
 
-    const string payload = to_string(id);
+    // Calculate expiration time (Current time + 3 hours)
+    auto now = chrono::system_clock::now();
+    auto expiry = now + chrono::hours(3);
+    uint64_t exp_epoch = chrono::duration_cast<chrono::seconds>(expiry.time_since_epoch()).count();
+
+    // Combine id and expiration into the payload string
+    const string payload = to_string(id) + ":" + to_string(exp_epoch);
     vector<unsigned char> plain(payload.begin(), payload.end());
 
     aes_cpp::AES aes(aes_cpp::AESKeyLength::AES_256);
@@ -39,9 +46,8 @@ public:
     return to_hex(iv) + "." + to_hex(cipher) + "." + to_hex(tag);
   }
 
-  // Validate and decode a token. Returns nullopt on any failure.
+  // Validate, decrypt token, and check expiry. Returns nullopt if expired or invalid.
   optional<Id> get_id(string_view token) const {
-    // Split on '.'
     auto parts = split(token, '.');
     if (parts.size() != 3)
       return nullopt;
@@ -62,10 +68,26 @@ public:
       vector<unsigned char> plain =
           aes.DecryptGCM(*cipher_bytes, key, *iv_bytes, /*aad=*/{}, *tag_bytes);
 
-      string id_str(plain.begin(), plain.end());
-      return static_cast<Id>(stoull(id_str));
+      string payload_str(plain.begin(), plain.end());
+      auto payload_parts = split(payload_str, ':');
+      if (payload_parts.size() != 2)
+        return nullopt;
+
+      Id id = stoull(string(payload_parts[0]));
+      uint64_t exp_epoch = stoull(string(payload_parts[1]));
+
+      // Check if token has expired
+      auto now_epoch = chrono::duration_cast<chrono::seconds>(
+          chrono::system_clock::now().time_since_epoch()
+      ).count();
+
+      if (now_epoch > exp_epoch) {
+        return nullopt; // Token expired
+      }
+
+      return id;
     } catch (const exception &) {
-      // Authentication failure or bad data
+      // Authentication failure, decryption error, or bad data
       return nullopt;
     }
   }

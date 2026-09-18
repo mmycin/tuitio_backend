@@ -11,6 +11,8 @@ class User {
     string email;
     string password_hash;
 
+    User() = default;
+
     User(int id) : id(id) {}
 
     User(string name, string email, string password_hash)

@@ -4,8 +4,6 @@
 #include "repositories/repository.hpp"
 #include "spdlog/spdlog.h"
 #include <SQLiteCpp/Statement.h>
-#include <iostream>
-
 
 using namespace std;
 
@@ -26,7 +24,7 @@ class UserRepository : public IRepository {
                 user.email = query.getColumn(1).getString();
             }
         } catch (std::exception &e) {
-            cout << "exception: " << e.what() << endl;
+            spdlog::error("exception: {}", e.what());
         }
         return user;
     }
@@ -45,14 +43,38 @@ class UserRepository : public IRepository {
 
         try {
             while (query.executeStep()) {
-            	user.id = query.getColumn(0);
+                user.id = query.getColumn(0);
             }
         } catch (std::exception &e) {
-            cout << "exception: " << e.what() << endl;
+            spdlog::error("exception: {}", e.what());
         }
 
-        if(user.id == 0) {
-        	spdlog::error("User creation failed");
+        if (user.id == 0) {
+            spdlog::error("User creation failed");
         }
+    }
+
+    User getUserByEmail(string email) {
+        User user(0);
+
+        SQLite::Statement query(this->db, R"SQL(
+        	SELECT id, name, email, password_hash
+         	FROM users
+          	WHERE email = ?;
+        )SQL");
+        query.bind(1, email);
+
+        try {
+            while (query.executeStep()) {
+                user.id = query.getColumn(0);
+                user.name = query.getColumn(1).getString();
+                user.email = query.getColumn(2).getString();
+                user.password_hash = query.getColumn(3).getString();
+            }
+        } catch (std::exception &e) {
+            spdlog::error("exception: {}", e.what());
+        }
+
+        return user;
     }
 };

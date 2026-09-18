@@ -5,6 +5,7 @@
 #include <csignal>
 #include "configs/app_config.hpp"
 #include "di/user_di.hpp"
+#include "di/auth_di.hpp"
 
 #include "middlewares/auth.hpp"
 #include "middlewares/cors.hpp"
@@ -35,6 +36,7 @@ private:
 
     void initializeModules() {
         modules.push_back(std::make_unique<UserDI>());
+        modules.push_back(std::make_unique<AuthDI>());
     }
 
     void setupRoutes() {

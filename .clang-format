@@ -5,3 +5,4 @@ TabWidth: 4
 UseTab: Never
 
 AllowShortFunctionsOnASingleLine: Empty
+Cpp11BracedListStyle: false

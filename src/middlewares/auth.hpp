@@ -6,7 +6,7 @@
 
 inline void useAuth(httplib::Server &server) {
     server.set_pre_routing_handler([](const httplib::Request &req, httplib::Response &res) {
-        if (req.path == "/login" || req.path == "signup") {
+        if (req.path == "/auth/login" || req.path == "/auth/signup") {
         	return httplib::Server::HandlerResponse::Unhandled;
         }
 
