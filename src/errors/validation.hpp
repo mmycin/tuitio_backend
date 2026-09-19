@@ -9,26 +9,34 @@ private:
     nlohmann::json fieldErrors;
 
 public:
-    // Add a check condition. If false, record the error for that field.
     Validator& check(bool condition, const std::string &field, const std::string &message) {
         if (!condition) {
-            fieldErrors[field] = message;
+            if (!fieldErrors.contains(field)) {
+                fieldErrors[field] = nlohmann::json::array();
+            }
+            fieldErrors[field].push_back(message);
         }
         return *this;
     }
 
-    // Check if any errors were recorded and throw the global ValidationError
     void validate() {
         if (!fieldErrors.empty()) {
             throw ValidationError(fieldErrors);
         }
     }
 
-    // Static helper for quick validation checks
+    bool hasErrors() const {
+        return !fieldErrors.empty();
+    }
+
+    const nlohmann::json& getErrors() const {
+        return fieldErrors;
+    }
+
     static void assertField(bool condition, const std::string &field, const std::string &message) {
         if (!condition) {
             nlohmann::json err;
-            err[field] = message;
+            err[field] = nlohmann::json::array({message});
             throw ValidationError(err);
         }
     }

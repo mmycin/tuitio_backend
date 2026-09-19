@@ -2,6 +2,7 @@
 
 #define _HAS_STD_BYTE 0
 
+#include "errors/api.hpp"
 #include "repositories/user_repository.hpp"
 #include "services/service.hpp"
 #include "utils/bearer_token.hpp"
@@ -19,44 +20,54 @@ class AuthService : public IService {
     std::tuple<User, string> loginUser(string email, string password) {
         User user = this->repo->getUserByEmail(email);
         if (user.id == 0) {
-            return { User(0), "User Not found" };
+            throw NotFoundError("User not found with the provided email");
         }
 
         if (PasswordHash::verify(password, user.password_hash)) {
             string token = this->auth_manager->make_token(user.id);
             return { user, token };
         } else {
-            return { User(0), "Invalid Credentials" };
+            throw UnauthorizedError("Invalid credentials");
         }
-
-        return { User(0), "Something went wrong" };
     }
 
     User verifyUser(const httplib::Request &req) {
         string auth_header = req.get_header_value("Authorization");
         string token = "";
-        User user;
 
-        // Check if the header starts with "Bearer " and has content after it
         if (auth_header.rfind("Bearer ", 0) == 0 && auth_header.size() > 7) {
             token = auth_header.substr(7);
         } else {
-            spdlog::warn("Invalid or missing Authorization header format.");
+            throw UnauthorizedError("Invalid or missing Authorization header format");
         }
 
         auto id = this->auth_manager->get_id(token);
         if (!id) {
-            return user;
+            throw UnauthorizedError("Invalid or expired token");
         }
 
-        user = this->repo->getUserById(*id);
+        User user = this->repo->getUserById(*id);
+        if (user.id == 0) {
+            throw NotFoundError("User not found");
+        }
         return user;
     }
 
     User signUp(string name, string email, string password) {
-        auto password_hash = PasswordHash::hash(password);
+        User existing = this->repo->getUserByEmail(email);
+        if (existing.id != 0) {
+            nlohmann::json details;
+            details["email"] = "Email is already registered";
+            throw ValidationError(details, "Validation failed");
+        }
 
+        auto password_hash = PasswordHash::hash(password);
         auto user = this->repo->createUser(User(name, email, password_hash));
+
+        if (user.id == 0) {
+            throw ApiError("Failed to create user account", 500);
+        }
+
         return user;
     }
 

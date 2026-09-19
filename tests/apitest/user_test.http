@@ -16,6 +16,6 @@
 #}
 
 
-GET http://localhost:5000/auth/me
-Content-Type: application/json
-Authorization: Bearer 16e860c54c735170cfdee9d6.62a52b2944edde16051d6650f9.c04b953fad5c054a67afc6dacfe7ad9e
+#GET http://localhost:5000/auth/me
+#Content-Type: application/json
+#Authorization: Bearer 16e860c54c735170cfdee9d6.62a52b2944edde16051d6650f9.c04b953fad5c054a67afc6dacfe7ad9e

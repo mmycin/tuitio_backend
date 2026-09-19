@@ -1,5 +1,6 @@
 #pragma once
 
+#include "errors/api.hpp"
 #include <memory>
 #include "repositories/{{name}}_repository.hpp"
 #include "services/service.hpp"

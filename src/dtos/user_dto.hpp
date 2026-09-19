@@ -1,9 +1,9 @@
 #pragma once
 
 #include "dtos/dto.hpp"
+#include "errors/validation.hpp"
 #include "models/user_model.hpp"
 #include <nlohmann/json.hpp>
-#include <stdexcept>
 #include <string>
 
 
@@ -25,14 +25,15 @@ class GetUserResponse : public IUserDTO {
         this->id = id;
         this->name = name;
         this->email = email;
-        validate(); // Ensures data is valid upon creation
+        validate();
     }
 
     void validate() override {
-        if (this->id <= 0 || this->name.empty() || this->email.empty()) {
-            throw std::invalid_argument(
-                "Validation Failed: id, name, or email is missing/invalid.");
-        }
+        Validator()
+            .check(this->id > 0, "id", "Id must be a positive integer")
+            .check(!this->name.empty(), "name", "Name is required")
+            .check(!this->email.empty(), "email", "Email is required")
+            .validate();
     }
 
     static GetUserResponse fromUser(const User &user) {

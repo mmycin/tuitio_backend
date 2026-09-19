@@ -1,8 +1,12 @@
 #pragma once
 
+#define _HAS_STD_BYTE 0
+
 #include <httplib.h>
 #include <spdlog/spdlog.h>
 #include <csignal>
+#include "errors/base_error.hpp"
+#include "errors/api.hpp"
 #include "configs/app_config.hpp"
 #include "di/user_di.hpp"
 #include "di/auth_di.hpp"
@@ -17,7 +21,6 @@ private:
     httplib::Server server;
     std::vector<std::unique_ptr<IDI>> modules;
 
-    // Static pointer to allow global signal handler to call server.stop()
     inline static httplib::Server* active_server = nullptr;
 
     static void signalHandler(int signum) {
@@ -25,6 +28,42 @@ private:
         if (active_server) {
             active_server->stop();
         }
+    }
+
+    void setExceptionHandler() {
+        server.set_exception_handler([](const httplib::Request &, httplib::Response &res,
+                                        std::exception_ptr ep) {
+            try {
+                if (ep) {
+                    std::rethrow_exception(ep);
+                }
+            } catch (const AppException &e) {
+                res.status = e.getStatusCode();
+                res.set_content(e.toJson().dump(), "application/json");
+            } catch (const nlohmann::json::exception &e) {
+                ApiError err("Invalid JSON format or missing fields: " + std::string(e.what()), 400);
+                res.status = err.getStatusCode();
+                res.set_content(err.toJson().dump(), "application/json");
+            } catch (const std::invalid_argument &e) {
+                ApiError err(e.what(), 400);
+                res.status = err.getStatusCode();
+                res.set_content(err.toJson().dump(), "application/json");
+            } catch (const std::out_of_range &e) {
+                ApiError err("Invalid parameter: " + std::string(e.what()), 400);
+                res.status = err.getStatusCode();
+                res.set_content(err.toJson().dump(), "application/json");
+            } catch (const std::exception &e) {
+                spdlog::error("Unhandled exception: {}", e.what());
+                ApiError err("Internal Server Error", 500);
+                res.status = err.getStatusCode();
+                res.set_content(err.toJson().dump(), "application/json");
+            } catch (...) {
+                spdlog::error("Unknown exception occurred");
+                ApiError err("Internal Server Error", 500);
+                res.status = err.getStatusCode();
+                res.set_content(err.toJson().dump(), "application/json");
+            }
+        });
     }
 
     void setMiddleWares() {
@@ -49,10 +88,10 @@ public:
     AppContainer() {
         active_server = &server;
 
-        // Register system signals for graceful termination (Ctrl+C / Docker stop)
         std::signal(SIGINT, signalHandler);
         std::signal(SIGTERM, signalHandler);
 
+        setExceptionHandler();
         setMiddleWares();
         initializeModules();
         setupRoutes();
@@ -69,7 +108,6 @@ public:
         spdlog::info("   Port : {}", port);
         spdlog::info("   URL  : http://{}:{}", host, port);
     
-        // server.listen blocks execution here until server.stop() is called
         if (!server.listen(host, port)) {
             spdlog::error("❌ Failed to start server or server stopped abruptly on {}:{}", host, port);
             return;

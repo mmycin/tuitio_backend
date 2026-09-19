@@ -1,6 +1,8 @@
 #pragma once
 
 #include "controllers/controller.hpp"
+#include "errors/api.hpp"
+#include "errors/validation.hpp"
 #include "dtos/user_dto.hpp"
 #include "services/user_service.hpp"
 #include <httplib.h>
@@ -8,6 +10,7 @@
 #include <string>
 
 using namespace std;
+using json = nlohmann::json;
 
 class UserController : public IController {
   private:
@@ -22,17 +25,21 @@ class UserController : public IController {
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
+        string id_str = req.matches[1];
+        Validator::assertField(!id_str.empty(), "id", "User id is required");
+
+        int userId = 0;
         try {
-            string id_str = req.matches[1];
-            int userId = std::stoi(id_str);
-
-            auto user = service->getUserById(userId);
-            auto user_dao = GetUserResponse::fromUser(user);
-
-            sendJson(res, 200, user_dao.toJson());
-        } catch (const exception &e) {
-            sendError(res, 400, e.what());
+            userId = std::stoi(id_str);
+        } catch (const std::exception &) {
+            json details;
+            details["id"] = "User id must be a valid integer";
+            throw ValidationError(details, "Validation failed");
         }
+
+        auto user = service->getUserById(userId);
+        auto user_dao = GetUserResponse::fromUser(user);
+        sendJson(res, 200, user_dao.toJson());
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {

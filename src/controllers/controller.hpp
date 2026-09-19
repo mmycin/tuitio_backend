@@ -1,7 +1,10 @@
 #pragma once
 
+#include "errors/base_error.hpp"
 #include <httplib.h>
 #include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class IController {
   public:
@@ -15,8 +18,8 @@ class IController {
 
   protected:
     void sendJson(httplib::Response &res, int status,
-                  const nlohmann::json &data) {
-        nlohmann::json response;
+                  const json &data) {
+        json response;
         response["status"] = status;
         response["data"] = data;
         res.status = status;
@@ -24,11 +27,20 @@ class IController {
     }
 
     void sendError(httplib::Response &res, int status,
-                   const std::string &message) {
-        nlohmann::json error;
+                   const std::string &message,
+                   const json &details = nullptr) {
+        json error;
         error["status"] = status;
         error["error"] = message;
+        if (!details.is_null()) {
+            error["details"] = details;
+        }
         res.status = status;
         res.set_content(error.dump(), "application/json");
+    }
+
+    void sendAppError(httplib::Response &res, const AppException &e) {
+        res.status = e.getStatusCode();
+        res.set_content(e.toJson().dump(), "application/json");
     }
 };

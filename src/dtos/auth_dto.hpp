@@ -2,6 +2,7 @@
 
 #include "dtos/dto.hpp"
 #include "dtos/user_dto.hpp"
+#include "errors/validation.hpp"
 #include "models/user_model.hpp"
 #include <nlohmann/json.hpp>
 
@@ -24,9 +25,10 @@ class LoginRequest : public IAuthRequestDTO {
     }
 
     void validate() override {
-        if (this->email.empty() || this->password.empty()) {
-            throw std::runtime_error("Email and password are required");
-        }
+        Validator()
+            .check(!this->email.empty(), "email", "Email is required")
+            .check(!this->password.empty(), "password", "Password is required")
+            .validate();
     }
 
     json toJson() override {
@@ -48,10 +50,11 @@ class SignUpRequest : public IAuthRequestDTO {
     }
 
     void validate() override {
-        if (this->name.empty() || this->email.empty() ||
-            this->password.empty()) {
-            throw std::runtime_error("Email and password are required");
-        }
+        Validator()
+            .check(!this->name.empty(), "name", "Name is required")
+            .check(!this->email.empty(), "email", "Email is required")
+            .check(!this->password.empty(), "password", "Password is required")
+            .validate();
     }
 
     json toJson() override {
@@ -81,11 +84,12 @@ class LoginResponse : public IAuthResponseDTO {
     }
 
     void validate() override {
-        if (this->token.empty() || this->user.id <= 0 ||
-            this->user.name.empty() || this->user.email.empty()) {
-            throw std::invalid_argument("Validation Failed: token, id, name, "
-                                        "or email is missing/invalid.");
-        }
+        Validator()
+            .check(!this->token.empty(), "token", "Token is required")
+            .check(this->user.id > 0, "user.id", "User id must be a positive integer")
+            .check(!this->user.name.empty(), "user.name", "User name is required")
+            .check(!this->user.email.empty(), "user.email", "User email is required")
+            .validate();
     }
 
     json toJson() override {
@@ -105,9 +109,10 @@ class SignUpResponse : public IAuthResponseDTO {
     }
 
     void validate() override {
-        if (this->user.id == 0 || this->user.name.empty()) {
-            throw std::runtime_error("Validation Error");
-        }
+        Validator()
+            .check(this->user.id > 0, "user.id", "User id must be a positive integer")
+            .check(!this->user.name.empty(), "user.name", "User name is required")
+            .validate();
     }
 
     json toJson() override {
