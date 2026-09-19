@@ -92,6 +92,36 @@ add_subdirectory(
 )
 
 # -------------------------
+# hiredis + redis-plus-plus
+# -------------------------
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+set(DISABLE_TESTS ON CACHE BOOL "" FORCE)
+set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(
+    thirdparty/redis/hiredis
+    ${CMAKE_BINARY_DIR}/hiredis
+)
+
+set(HIREDIS_HEADER
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/redis/hiredis/include
+    CACHE PATH "" FORCE
+)
+
+set(HIREDIS_LIB hiredis CACHE INTERNAL "" FORCE)
+
+set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
+set(REDIS_PLUS_PLUS_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(REDIS_PLUS_PLUS_BUILD_SHARED ON CACHE BOOL "" FORCE)
+set(REDIS_PLUS_PLUS_CXX_STANDARD 20 CACHE STRING "" FORCE)
+
+add_subdirectory(
+    thirdparty/redis/redis-plus-plus
+    ${CMAKE_BINARY_DIR}/redis-plus-plus
+)
+
+# -------------------------
 # Monocypher
 # -------------------------
 add_library(monocypher STATIC
@@ -118,4 +148,5 @@ target_link_libraries(cweb_dependencies
         spdlog::spdlog
         CLI11::CLI11
         monocypher
+        redis++
 )
