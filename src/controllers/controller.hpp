@@ -1,5 +1,7 @@
 #pragma once
 
+#define _HAS_STD_BYTE 0
+
 #include "errors/base_error.hpp"
 #include <httplib.h>
 #include <nlohmann/json.hpp>

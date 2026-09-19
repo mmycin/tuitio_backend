@@ -5,23 +5,24 @@
 #include <string>
 
 using namespace std;
+using json = nlohmann::json;
 
 class AppException : public std::runtime_error {
   protected:
     int statusCode;
-    nlohmann::json details;
+    json details;
 
   public:
     AppException(int code, const string &message,
-                 nlohmann::json errDetails = nullptr)
+                 json errDetails = nullptr)
         : std::runtime_error(message), statusCode(code), details(errDetails) {}
 
     int getStatusCode() const {
         return statusCode;
     }
 
-    virtual nlohmann::json toJson() const {
-        nlohmann::json json;
+    virtual json toJson() const {
+        json json;
         json["status"] = statusCode;
         json["error"] = what();
         if (!details.is_null()) {
