@@ -38,8 +38,8 @@ class UserController : public IController {
         }
 
         auto user = service->getUserById(userId);
-        auto user_dao = GetUserResponse::fromUser(user);
-        sendJson(res, 200, user_dao.toJson());
+        auto user_dto = GetUserResponse::fromUser(user);
+        sendJson(res, 200, user_dto.toJson());
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {

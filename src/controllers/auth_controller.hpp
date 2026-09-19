@@ -42,15 +42,15 @@ class AuthController : public IController {
     void login(const httplib::Request &req, httplib::Response &res) {
         auto loginReq = json::parse(req.body).get<LoginRequest>();
         auto [user, token] = this->service->loginUser(loginReq.email, loginReq.password);
-        auto login_dao = LoginResponse(token, user);
-        sendJson(res, 200, login_dao.toJson());
+        auto login_dto = LoginResponse(token, user);
+        sendJson(res, 200, login_dto.toJson());
     }
 
     void signup(const httplib::Request &req, httplib::Response &res) {
         auto signupReq = json::parse(req.body).get<SignUpRequest>();
         auto user = this->service->signUp(signupReq.name, signupReq.email, signupReq.password);
-        auto user_dao = GetUserResponse::fromUser(user);
-        sendJson(res, 201, user_dao.toJson());
+        auto user_dto = GetUserResponse::fromUser(user);
+        sendJson(res, 201, user_dto.toJson());
     }
 
     void verify(const httplib::Request &req, httplib::Response &res) {

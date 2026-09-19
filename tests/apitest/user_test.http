@@ -1,8 +1,8 @@
-# POST http://localhost:5000/auth/login
-# Content-Type: application/json
+#POST http://localhost:5000/auth/login
+#Content-Type: application/json
 
 #{
-# "email": "mycin.mit@gmail.com",
+# "email": "fazlul@gmail.com",
 #  "password": "12345678"
 #}
 
@@ -10,12 +10,12 @@
 #Content-Type: application/json
 
 #{
-#	"name": "Tahcin Mycin",
-#	"email": "mycin@gmail.com",
+#	"name": "Fazlul Karim",
+#	"email": "fazlul@gmail.com",
 # 	"password": "12345678"
 #}
 
 
-#GET http://localhost:5000/auth/me
-#Content-Type: application/json
-#Authorization: Bearer 16e860c54c735170cfdee9d6.62a52b2944edde16051d6650f9.c04b953fad5c054a67afc6dacfe7ad9e
+GET http://localhost:5000/auth/me
+Content-Type: application/json
+Authorization: Bearer b25d4c6941ffe7c356cfd2f0.79c78cb154cc522c78b8a4e11d.57b44ad649e7534799e9c47f2fc26523
