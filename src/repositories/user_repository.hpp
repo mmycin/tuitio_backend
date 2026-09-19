@@ -73,9 +73,37 @@ class UserRepository : public IRepository {
             }
         } catch (const std::exception &e) {
             spdlog::error("Database error in getUserByEmail: {}", e.what());
-            throw ApiError("Database error while looking up user by email", 500);
+            throw ApiError("Database error while looking up user by email",
+                           500);
         }
 
         return user;
+    }
+
+    bool deleteUser(int id) {
+        User user;
+        try {
+            SQLite::Statement query(this->db, R"SQL(
+	        	DELETE FROM users
+				WHERE id = ?
+				RETURNING *;
+            )SQL");
+            query.bind(1, id);
+
+            while(query.executeStep()) {
+            	user.id = query.getColumn(0);
+            }
+
+            if(user.id == 0) {
+            	return false;
+            } else {
+            	return true;
+            }
+            
+        } catch (const std::exception &e) {
+            spdlog::error("Database error in getUserByEmail: {}", e.what());
+            throw ApiError("Database error while looking up user by email",
+                           500);
+        }
     }
 };

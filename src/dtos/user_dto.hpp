@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-
 using namespace std;
 using json = nlohmann::json;
 
@@ -45,6 +44,23 @@ class GetUserResponse : public IUserDTO {
             { "id", this->id },
             { "name", this->name },
             { "email", this->email },
+        };
+    }
+};
+
+class DeleteUserResponse : public IDTO {
+  public:
+    bool success = false;
+
+    void validate() override {}
+
+    DeleteUserResponse(bool success) {
+        this->success = success;
+    }
+
+    json toJson() override {
+        return json{
+            { "success", this->success },
         };
     }
 };
