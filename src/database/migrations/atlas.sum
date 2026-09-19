@@ -1,3 +1,4 @@
-h1:UA7A+SVqUFfpqfxPadrRLm06zsWtrrbSs+rFV/zPBFc=
-20260917202552_create_users_table.sql h1:yqXwNAiYgZxqAJqzufUwLgTc39DMtVSEv4SgxI2dbOA=
-20260917203053_create_students_table.sql h1:Pnpu5ykUQcEcEbkl1CvhHBlussarOCd7sQgQ2reTAf4=
+h1:lpHhY+Y8GBsOKsVnFk81jn1nFBpy0aLNzXfcoA2kqjo=
+20260919161308_create_cycles_table.sql h1:HFJZnNHB7dzGYIt8ul0XiOGmWxUPWDTsl+ztSQFwOM4=
+20260919161605_create_classes_table.sql h1:mFIXMMgIDC+ixJLr5LoUTsgIWOUVMmudM3q7KooQEKQ=
+20260919161801_create_payments_table.sql h1:W0ehLrguDFI6GeGwszsolW9js35Io6SmxRhCDKhLM2o=
