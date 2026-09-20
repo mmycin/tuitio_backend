@@ -1,23 +1,11 @@
-#include <iostream>
-#include <sw/redis++/redis++.h>
+#include <dotenv.h>
+#include "cache/cache.hpp"
 
-int main() {
-    try {
-        sw::redis::Redis redis("tcp://100.80.4.100:6379");
+int main() 
+{
+	dotenv::init();
 
-        redis.setex("foo", 5, "bar");
-
-        // auto value = redis.get("hello");
-
-        // if (value) {
-        //     std::cout << "Value: " << *value << '\n';
-        // } else {
-        //     std::cout << "Key not found\n";
-        // }
-    } catch (const sw::redis::Error& e) {
-        std::cerr << "Redis error: " << e.what() << '\n';
-        return 1;
-    }
-
+	Cache::update("name", "bingo", 5 * Cache::Time::Second);
+	
     return 0;
 }
