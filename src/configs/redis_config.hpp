@@ -7,6 +7,12 @@ using namespace std;
 
 class RedisConfig {
   public:
-  	inline static const string REDIS_HOST = getEnv("REDIS_HOST");
-  	inline static const string REDIS_PORT = getEnv("REDIS_PORT");
+    static inline const string &REDIS_HOST() {
+        static const string value = getEnv("REDIS_HOST");
+        return value;
+    }
+    static inline const string &REDIS_PORT() {
+        static const string value = getEnv("REDIS_PORT");
+        return value;
+    }
 };

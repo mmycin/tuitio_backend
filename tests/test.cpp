@@ -1,11 +1,13 @@
 #include <dotenv.h>
-#include "cache/cache.hpp"
+#include <iostream>
+#include "cache.hpp"
 
 int main() 
 {
 	dotenv::init();
 
-	Cache::update("name", "bingo", 5 * Cache::Time::Second);
+	auto val = Cache::get("name");
+	cout << *val << endl;
 	
     return 0;
 }
