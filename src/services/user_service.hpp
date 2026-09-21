@@ -4,13 +4,14 @@
 #include "models/user_model.hpp"
 #include "repositories/user_repository.hpp"
 #include "services/service.hpp"
+#include "utils/bearer_token.hpp"
 #include <memory>
-
 
 class UserService : public IService {
   public:
-    explicit UserService(std::unique_ptr<UserRepository> repo)
-        : repo(std::move(repo)) {}
+    explicit UserService(std::unique_ptr<UserRepository> repo,
+                         std::unique_ptr<AuthManager> auth_manager)
+        : repo(std::move(repo)), auth_manager(std::move(auth_manager)) {}
 
     User getUserById(int id) {
         User user = this->repo->getUserById(id);
@@ -21,11 +22,21 @@ class UserService : public IService {
         return user;
     }
 
-    bool deleteUserById(int id) {
-        bool isDeleted = this->repo->deleteUser(id);
-        return isDeleted;
+    bool deleteUserById(string token, int id) {
+    	auto userId_opt = this->auth_manager->get_id(token);
+     	if(!userId_opt) {
+      		throw UnauthorizedError("You are not authenticated to delete the user");
+      	}
+      	int userId = *userId_opt;
+
+       if(userId != id) {
+      		throw ValidationError("Your requested user can not be deleted by you");
+       }
+
+       return this->repo->deleteUser(id);
     }
 
   private:
     std::unique_ptr<UserRepository> repo;
+    std::unique_ptr<AuthManager> auth_manager;
 };

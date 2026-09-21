@@ -84,26 +84,20 @@ class UserRepository : public IRepository {
         User user;
         try {
             SQLite::Statement query(this->db, R"SQL(
-	        	DELETE FROM users
-				WHERE id = ?
-				RETURNING *;
+           		DELETE FROM users
+             	WHERE id = ?
+              	RETURNING *;
             )SQL");
             query.bind(1, id);
 
-            while(query.executeStep()) {
-            	user.id = query.getColumn(0);
+            while (query.executeStep()) {
+                user.id = query.getColumn(0);
             }
 
-            if(user.id == 0) {
-            	return false;
-            } else {
-            	return true;
-            }
-            
+            return user.id == 0 ? false : true;
         } catch (const std::exception &e) {
-            spdlog::error("Database error in getUserByEmail: {}", e.what());
-            throw ApiError("Database error while looking up user by email",
-                           500);
+            spdlog::error("Database error in deleteUserById: {}", e.what());
+            throw ApiError("Can not delete this user", 500);
         }
     }
 };

@@ -49,6 +49,7 @@ class UserController : public IController {
     void update(const httplib::Request &req, httplib::Response &res) override {
         sendError(res, 405, "Method not allowed");
     }
+    
     void destroy(const httplib::Request &req, httplib::Response &res) override {
         string id_str = req.matches[1];
         Validator::assertField(!id_str.empty(), "id", "User id is required");
@@ -62,13 +63,15 @@ class UserController : public IController {
             throw ValidationError(details, "Validation failed");
         }
 
-        bool isDeleted = this->service->deleteUserById(userId);
-        if (!isDeleted) {
-            sendError(res, 501, "Can not delete user");
+        string token = this->getTokenFromHeader(req);
+
+        bool isDeleted = this->service->deleteUserById(token, userId);
+
+        if(isDeleted) {
+        	sendJson(res, 200, DeleteUserResponse(isDeleted).toJson());
+        } else {
+        	sendError(res, 401, DeleteUserResponse(isDeleted).toJson());
         }
-
-        auto delete_dto = DeleteUserResponse(isDeleted);
-
-        sendJson(res, 200, delete_dto.toJson());
+        
     }
 };
