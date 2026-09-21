@@ -48,6 +48,48 @@ class GetUserResponse : public IUserDTO {
     }
 };
 
+class UpdateUserRequest : public IUserDTO {
+  public:
+    string name = "";
+    string email = "";
+    string password = "";
+
+    UpdateUserRequest() = default;
+
+    UpdateUserRequest(string name, string email, string password) {
+        this->name = name;
+        this->email = email;
+        this->password = password;
+
+        validate();
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        return json{};
+    }
+};
+
+class UpdateUserResponse : public IUserDTO {
+    bool success = false;
+    User user;
+
+    UpdateUserResponse(bool success, User user) {
+        this->success = success;
+        this->user = user;
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        return json{
+            { "success", this->success },
+            { "user", GetUserResponse::fromUser(user).toJson() },
+        };
+    }
+};
+
 class DeleteUserResponse : public IDTO {
   public:
     bool success = false;
@@ -64,3 +106,12 @@ class DeleteUserResponse : public IDTO {
         };
     }
 };
+
+namespace nlohmann {
+inline void from_json(const json &j, UpdateUserRequest &req) {
+    j.at("name").get_to(req.name);
+    j.at("email").get_to(req.email);
+    j.at("password").get_to(req.password);
+    req.validate();
+}
+} // namespace nlohmann
