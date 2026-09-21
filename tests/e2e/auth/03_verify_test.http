@@ -1,0 +1,3 @@
+GET http://localhost:5000/auth/me
+Content-Type: application/json
+Authorization: Bearer b25d4c6941ffe7c356cfd2f0.79c78cb154cc522c78b8a4e11d.57b44ad649e7534799e9c47f2fc26523
