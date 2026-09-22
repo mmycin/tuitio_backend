@@ -43,15 +43,15 @@ target_link_libraries(server
         cweb_dependencies
 )
 
-add_custom_command(TARGET server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:redis++>
-        $<TARGET_FILE_DIR:server>
+# add_custom_command(TARGET server POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         $<TARGET_FILE:redis++>
+#         $<TARGET_FILE_DIR:server>
 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:hiredis>
-        $<TARGET_FILE_DIR:server>
-)
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         $<TARGET_FILE:hiredis>
+#         $<TARGET_FILE_DIR:server>
+# )
 
 # -----------------------------------------------------------------------------
 # CLI Executable (CLI11)
@@ -71,15 +71,15 @@ target_link_libraries(cli
         cweb_dependencies
 )
 
-add_custom_command(TARGET cli POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:redis++>
-        $<TARGET_FILE_DIR:cli>
+# add_custom_command(TARGET cli POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         $<TARGET_FILE:redis++>
+#         $<TARGET_FILE_DIR:cli>
 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:hiredis>
-        $<TARGET_FILE_DIR:cli>
-)
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         $<TARGET_FILE:hiredis>
+#         $<TARGET_FILE_DIR:cli>
+# )
 
 # Assuming your executable target is named 'server'
 target_compile_definitions(server PRIVATE 

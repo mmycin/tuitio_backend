@@ -18,10 +18,10 @@ build-seeder:
 	@cmake --build build --target seeder
 
 serve:
-	@./bin/server.exe
+	@./bin/server
 
-test:
-	@./bin/test.exe
+test:       
+	@./bin/test 
 
 erd:
 	@atlas schema inspect --url "sqlite://app.db" -w 

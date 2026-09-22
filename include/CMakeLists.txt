@@ -91,39 +91,39 @@ add_subdirectory(
     ${CMAKE_BINARY_DIR}/CLI11
 )
 
-# -------------------------
-# hiredis + redis-plus-plus
-# -------------------------
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+# # -------------------------
+# # hiredis + redis-plus-plus
+# # -------------------------
+# set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
-set(DISABLE_TESTS ON CACHE BOOL "" FORCE)
-set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+# set(DISABLE_TESTS ON CACHE BOOL "" FORCE)
+# set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(
-    thirdparty/redis/hiredis
-    ${CMAKE_BINARY_DIR}/hiredis
-)
+# add_subdirectory(
+#     thirdparty/redis/hiredis
+#     ${CMAKE_BINARY_DIR}/hiredis
+# )
 
-set(_HIREDIS_STAGE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/redis/hiredis/include")
-set(_HIREDIS_BUILD_LIB_DIR "${CMAKE_BINARY_DIR}/hiredis")
+# set(_HIREDIS_STAGE_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/redis/hiredis/include")
+# set(_HIREDIS_BUILD_LIB_DIR "${CMAKE_BINARY_DIR}/hiredis")
 
-list(INSERT CMAKE_INCLUDE_PATH 0 "${_HIREDIS_STAGE_INCLUDE}")
-list(INSERT CMAKE_LIBRARY_PATH 0 "${_HIREDIS_BUILD_LIB_DIR}")
-list(INSERT CMAKE_PREFIX_PATH 0 "${_HIREDIS_BUILD_LIB_DIR}")
+# list(INSERT CMAKE_INCLUDE_PATH 0 "${_HIREDIS_STAGE_INCLUDE}")
+# list(INSERT CMAKE_LIBRARY_PATH 0 "${_HIREDIS_BUILD_LIB_DIR}")
+# list(INSERT CMAKE_PREFIX_PATH 0 "${_HIREDIS_BUILD_LIB_DIR}")
 
-set(hiredis_FOUND OFF CACHE INTERNAL "" FORCE)
-set(HIREDIS_HEADER "${_HIREDIS_STAGE_INCLUDE}" CACHE PATH "" FORCE)
-set(HIREDIS_LIB hiredis CACHE INTERNAL "" FORCE)
+# set(hiredis_FOUND OFF CACHE INTERNAL "" FORCE)
+# set(HIREDIS_HEADER "${_HIREDIS_STAGE_INCLUDE}" CACHE PATH "" FORCE)
+# set(HIREDIS_LIB hiredis CACHE INTERNAL "" FORCE)
 
-set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
-set(REDIS_PLUS_PLUS_BUILD_STATIC ON CACHE BOOL "" FORCE)
-set(REDIS_PLUS_PLUS_BUILD_SHARED ON CACHE BOOL "" FORCE)
-set(REDIS_PLUS_PLUS_CXX_STANDARD 20 CACHE STRING "" FORCE)
+# set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
+# set(REDIS_PLUS_PLUS_BUILD_STATIC ON CACHE BOOL "" FORCE)
+# set(REDIS_PLUS_PLUS_BUILD_SHARED ON CACHE BOOL "" FORCE)
+# set(REDIS_PLUS_PLUS_CXX_STANDARD 20 CACHE STRING "" FORCE)
 
-add_subdirectory(
-    thirdparty/redis/redis-plus-plus
-    ${CMAKE_BINARY_DIR}/redis-plus-plus
-)
+# add_subdirectory(
+#     thirdparty/redis/redis-plus-plus
+#     ${CMAKE_BINARY_DIR}/redis-plus-plus
+# )
 
 # -------------------------
 # Monocypher
@@ -152,5 +152,5 @@ target_link_libraries(cweb_dependencies
         spdlog::spdlog
         CLI11::CLI11
         monocypher
-        redis++
+        # redis++
 )
