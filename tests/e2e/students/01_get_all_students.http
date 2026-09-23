@@ -1,0 +1,3 @@
+GET http://localhost:5000/students
+Content-Type: application/json
+Authorization: Bearer 180fb7de090791ac6ad707ad.eb7298fe35ec81e4c4702a2b.ab3bfa455fe991b1e049db43f5e1335a

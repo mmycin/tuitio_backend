@@ -8,8 +8,10 @@
 #include "errors/base_error.hpp"
 #include "errors/api.hpp"
 #include "configs/app_config.hpp"
+
 #include "di/user_di.hpp"
 #include "di/auth_di.hpp"
+#include "di/student_di.hpp"
 
 #include "middlewares/auth.hpp"
 #include "middlewares/cors.hpp"
@@ -76,6 +78,7 @@ private:
     void initializeModules() {
         modules.push_back(std::make_unique<UserDI>());
         modules.push_back(std::make_unique<AuthDI>());
+        modules.push_back(std::make_unique<StudentDI>());
     }
 
     void setupRoutes() {
