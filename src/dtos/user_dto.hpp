@@ -50,12 +50,12 @@ class GetUserResponse : public IUserDTO {
 
 class UpdateUserRequest : public IUserDTO {
   public:
-    string name = "";
-    string email = "";
     string password = "";
 
+    // 1. Default constructor (zero arguments)
     UpdateUserRequest() = default;
 
+    // 2. Parameterized constructor (no default arguments)
     UpdateUserRequest(string name, string email, string password) {
         this->name = name;
         this->email = email;
@@ -72,8 +72,11 @@ class UpdateUserRequest : public IUserDTO {
 };
 
 class UpdateUserResponse : public IUserDTO {
+  public:
     bool success = false;
     User user;
+
+    UpdateUserResponse() = default;
 
     UpdateUserResponse(bool success, User user) {
         this->success = success;
@@ -107,11 +110,9 @@ class DeleteUserResponse : public IDTO {
     }
 };
 
-namespace nlohmann {
 inline void from_json(const json &j, UpdateUserRequest &req) {
-    j.at("name").get_to(req.name);
-    j.at("email").get_to(req.email);
-    j.at("password").get_to(req.password);
+    if (j.contains("name")) j.at("name").get_to(req.name);
+    if (j.contains("email")) j.at("email").get_to(req.email);
+    if (j.contains("password")) j.at("password").get_to(req.password);
     req.validate();
 }
-} // namespace nlohmann

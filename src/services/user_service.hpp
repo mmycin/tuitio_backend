@@ -1,7 +1,9 @@
 #pragma once
 
+#include "dtos/user_dto.hpp"
 #include "errors/api.hpp"
 #include "models/user_model.hpp"
+#include "password_hash.hpp"
 #include "repositories/user_repository.hpp"
 #include "services/service.hpp"
 #include "utils/bearer_token.hpp"
@@ -23,17 +25,39 @@ class UserService : public IService {
     }
 
     bool deleteUserById(string token, int id) {
-    	auto userId_opt = this->auth_manager->get_id(token);
-     	if(!userId_opt) {
-      		throw UnauthorizedError("You are not authenticated to delete the user");
-      	}
-      	int userId = *userId_opt;
+        auto userId_opt = this->auth_manager->get_id(token);
+        if (!userId_opt) {
+            throw UnauthorizedError(
+                "You are not authenticated to delete the user");
+        }
+        int userId = *userId_opt;
 
-       if(userId != id) {
-      		throw ValidationError("Your requested user can not be deleted by you");
-       }
+        if (userId != id) {
+            throw ValidationError(
+                "Your requested user can not be deleted by you");
+        }
 
-       return this->repo->deleteUser(id);
+        return this->repo->deleteUser(id);
+    }
+
+    User updateUser(string token, int id, UpdateUserRequest &req) {
+        auto userId_opt = this->auth_manager->get_id(token);
+        if (!userId_opt) {
+            throw UnauthorizedError(
+                "You are not authenticated to delete the user");
+        }
+        int userId = *userId_opt;
+
+        if (userId != id) {
+            throw ValidationError(
+                "Your requested user can not be deleted by you");
+        }
+
+        if (req.password != "") {
+            req.password = PasswordHash::hash(req.password);
+        }
+
+        return this->repo->updateUser(id, req);
     }
 
   private:

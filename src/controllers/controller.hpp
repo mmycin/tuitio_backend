@@ -6,6 +6,7 @@
 #include "errors/base_error.hpp"
 #include "errors/api.hpp"
 #include <nlohmann/json.hpp>
+#include "errors/validation.hpp"
 
 using json = nlohmann::json;
 
@@ -60,5 +61,21 @@ class IController {
         }
 
         return token;
+    }
+
+    int getIdFromRequest(const httplib::Request &req) {
+        string id_str = req.matches[1];
+        Validator::assertField(!id_str.empty(), "id", "User id is required");
+
+        int userId = 0;
+        try {
+            userId = std::stoi(id_str);
+        } catch (const std::exception &) {
+            json details;
+            details["id"] = "User id must be a valid integer";
+            throw ValidationError(details, "Validation failed");
+        }
+
+        return userId;
     }
 };

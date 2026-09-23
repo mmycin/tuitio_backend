@@ -25,17 +25,7 @@ class UserController : public IController {
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
-        string id_str = req.matches[1];
-        Validator::assertField(!id_str.empty(), "id", "User id is required");
-
-        int userId = 0;
-        try {
-            userId = std::stoi(id_str);
-        } catch (const std::exception &) {
-            json details;
-            details["id"] = "User id must be a valid integer";
-            throw ValidationError(details, "Validation failed");
-        }
+        int userId = getIdFromRequest(req);
 
         auto user = service->getUserById(userId);
         auto user_dto = GetUserResponse::fromUser(user);
@@ -47,37 +37,22 @@ class UserController : public IController {
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {
-        string id_str = req.matches[1];
-        Validator::assertField(!id_str.empty(), "id", "User id is required");
-
-        int userId = 0;
-        try {
-            userId = std::stoi(id_str);
-        } catch (const std::exception &) {
-            json details;
-            details["id"] = "User id must be a valid integer";
-            throw ValidationError(details, "Validation failed");
-        }
+        int userId = getIdFromRequest(req);
 
         string token = this->getTokenFromHeader(req);
 
-        UpdateUserRequest updateReq = json::parse(req.body);
+        UpdateUserRequest updateReq;
+        json::parse(req.body).get_to(updateReq);        User user = this->service->updateUser(token, userId, updateReq);
 
-        
+        if(user.id == 0) {
+            sendError(res, 501, "Can not update user");
+        } else {
+            sendJson(res, 200, UpdateUserResponse(true, user).toJson());
+        }
     }
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {
-        string id_str = req.matches[1];
-        Validator::assertField(!id_str.empty(), "id", "User id is required");
-
-        int userId = 0;
-        try {
-            userId = std::stoi(id_str);
-        } catch (const std::exception &) {
-            json details;
-            details["id"] = "User id must be a valid integer";
-            throw ValidationError(details, "Validation failed");
-        }
+        int userId = getIdFromRequest(req);
 
         string token = this->getTokenFromHeader(req);
 

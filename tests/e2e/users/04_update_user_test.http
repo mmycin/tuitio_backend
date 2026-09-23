@@ -1,0 +1,7 @@
+PUT http://localhost:5000/users/21
+Content-Type: application/json
+Authorization: Bearer 667b60827c571c3ca15007fa.9d947760562ced1bc7639a7633.f1f99427e8370c461bfb02e2f339fbed
+
+{
+    "password": "lasvegas14****"
+}

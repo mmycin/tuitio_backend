@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dtos/user_dto.hpp"
 #include "errors/api.hpp"
 #include "models/user_model.hpp"
 #include "repositories/repository.hpp"
@@ -14,7 +15,7 @@ class UserRepository : public IRepository {
         User user(id);
         try {
             SQLite::Statement query(this->db, R"SQL(
-                SELECT name, email
+                SELECT name, email, password_hash
                 FROM users
                 WHERE id = ?;
             )SQL");
@@ -23,6 +24,7 @@ class UserRepository : public IRepository {
             while (query.executeStep()) {
                 user.name = query.getColumn(0).getString();
                 user.email = query.getColumn(1).getString();
+                user.password_hash = query.getColumn(2).getString();
             }
         } catch (const std::exception &e) {
             spdlog::error("Database error in getUserById: {}", e.what());
@@ -99,5 +101,37 @@ class UserRepository : public IRepository {
             spdlog::error("Database error in deleteUserById: {}", e.what());
             throw ApiError("Can not delete this user", 500);
         }
+    }
+
+    User updateUser(int id, UpdateUserRequest &req) {
+        User user;
+
+        User oldUser = this->getUserById(id);
+
+        if (req.name == "")
+            req.name = oldUser.name;
+        if (req.email == "")
+            req.email = oldUser.email;
+        if (req.password == "")
+            req.password = oldUser.password_hash;
+
+        SQLite::Statement query(this->db, R"SQL(
+            UPDATE users
+            SET name = ?, email = ?, password_hash = ?
+            WHERE id = ?
+            RETURNING *;
+        )SQL");
+        query.bind(1, req.name);
+        query.bind(2, req.email);
+        query.bind(3, req.password);
+        query.bind(4, id);
+
+        while (query.executeStep()) {
+            user.id = query.getColumn(0);
+            user.name = query.getColumn(1).getString();
+            user.email = query.getColumn(2).getString();
+        }
+
+        return user;
     }
 };
