@@ -4,7 +4,7 @@
 #include "dtos/user_dto.hpp"
 #include "errors/validation.hpp"
 #include "models/user_model.hpp"
-#include <nlohmann/json.hpp>
+#include "dtos/from_json_macros.hpp"
 
 using json = nlohmann::json;
 
@@ -120,17 +120,5 @@ class SignUpResponse : public IAuthResponseDTO {
     }
 };
 
-namespace nlohmann {
-inline void from_json(const json &j, LoginRequest &req) {
-    j.at("email").get_to(req.email);
-    j.at("password").get_to(req.password);
-    req.validate();
-}
-
-inline void from_json(const json &j, SignUpRequest &req) {
-    j.at("name").get_to(req.name);
-    j.at("email").get_to(req.email);
-    j.at("password").get_to(req.password);
-    req.validate();
-}
-} // namespace nlohmann
+FROM_JSON(LoginRequest, email, password);
+FROM_JSON(SignUpRequest, name, email, password);

@@ -3,7 +3,7 @@
 #include "dtos/dto.hpp"
 #include "errors/validation.hpp"
 #include "models/user_model.hpp"
-#include <nlohmann/json.hpp>
+#include "dtos/from_json_macros.hpp"
 #include <string>
 
 using namespace std;
@@ -110,9 +110,4 @@ class DeleteUserResponse : public IDTO {
     }
 };
 
-inline void from_json(const json &j, UpdateUserRequest &req) {
-    if (j.contains("name")) j.at("name").get_to(req.name);
-    if (j.contains("email")) j.at("email").get_to(req.email);
-    if (j.contains("password")) j.at("password").get_to(req.password);
-    req.validate();
-}
+FROM_JSON_OPTIONAL(UpdateUserRequest, name, email, password);
