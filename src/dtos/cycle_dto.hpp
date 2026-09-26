@@ -23,7 +23,7 @@ class CyclesRequest : IDTO {
 
         void validate() override {
             Validator()
-                .check(!this->student_id == 0, "student_id", "Student id can not be null")
+                .check(this->student_id != 0, "student_id", "Student id can not be null")
                 .validate();
         }
 

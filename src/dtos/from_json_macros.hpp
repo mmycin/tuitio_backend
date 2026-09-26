@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 // --- Internal dispatch macro ---
+// Shift parameters so NAME maps to the correct macro based on argument count
 #define _JSON_GET_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
 
 // --- Required-field variants ---
@@ -46,9 +47,9 @@ inline void from_json(const nlohmann::json &j, cls &obj) { \
     obj.validate(); \
 }
 
-// Auto-dispatch: FROM_JSON(LoginRequest, email, password) → FROM_JSON_2(...)
+// Auto-dispatch: FROM_JSON(CyclesRequest, student_id, ids) -> FROM_JSON_2(...)
 #define FROM_JSON(cls, ...) \
-_JSON_GET_MACRO(__VA_ARGS__, FROM_JSON_5, FROM_JSON_4, FROM_JSON_3, FROM_JSON_2, FROM_JSON_1)(cls, __VA_ARGS__)
+    _JSON_GET_MACRO(__VA_ARGS__, FROM_JSON_5, FROM_JSON_4, FROM_JSON_3, FROM_JSON_2, FROM_JSON_1, unused)(cls, __VA_ARGS__)
 
 // --- Optional-field variants ---
 #define FROM_JSON_OPTIONAL_1(cls, f1) \
@@ -91,6 +92,6 @@ inline void from_json(const nlohmann::json &j, cls &obj) { \
     obj.validate(); \
 }
 
-// Auto-dispatch: FROM_JSON_OPTIONAL(UpdateUserRequest, name, email, password) → FROM_JSON_OPTIONAL_3(...)
+// Auto-dispatch: FROM_JSON_OPTIONAL(UpdateUserRequest, name, email) -> FROM_JSON_OPTIONAL_2(...)
 #define FROM_JSON_OPTIONAL(cls, ...) \
-_JSON_GET_MACRO(__VA_ARGS__, FROM_JSON_OPTIONAL_5, FROM_JSON_OPTIONAL_4, FROM_JSON_OPTIONAL_3, FROM_JSON_OPTIONAL_2, FROM_JSON_OPTIONAL_1)(cls, __VA_ARGS__)
+    _JSON_GET_MACRO(__VA_ARGS__, FROM_JSON_OPTIONAL_5, FROM_JSON_OPTIONAL_4, FROM_JSON_OPTIONAL_3, FROM_JSON_OPTIONAL_2, FROM_JSON_OPTIONAL_1, unused)(cls, __VA_ARGS__)
