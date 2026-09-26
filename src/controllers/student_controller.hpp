@@ -60,6 +60,15 @@ class StudentController : public IController {
     }
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {
-        sendError(res, 405, "Method not allowed");
+        string token = this->getTokenFromHeader(req);
+        int id = this->getIdFromRequest(req);
+
+        bool success = this->service->deleteStudent(token, id);
+
+        if(success) {
+            sendJson(res, 200, DeleteStudentResponse(success).toJson());
+        } else {
+            sendError(res, 501, "Can not delete this student");
+        }
     }
 };

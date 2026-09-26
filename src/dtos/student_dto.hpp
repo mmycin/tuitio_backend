@@ -32,7 +32,6 @@ class StudentResponse : public IDTO {
     }
 };
 
-
 class StudentsResponse : public IDTO {
   public:
     std::vector<StudentResponse> students;
@@ -48,8 +47,34 @@ class StudentsResponse : public IDTO {
         json j;
         j["students"] = nlohmann::json::array();
 
-        for(auto& student: this->students) {
+        for (auto &student : this->students) {
             j["students"].push_back(student.toJson());
+        }
+
+        return j;
+    }
+};
+
+class DeleteStudentResponse : IDTO {
+  public:
+    bool success;
+
+    DeleteStudentResponse() = default;
+    DeleteStudentResponse(bool success) {
+        this->success = success;
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        json j;
+
+        if(this->success) {
+            j["sucess"] = true;
+            j["message"] = "student deleted successfully";
+        } else {
+            j["sucess"] = false;
+            j["error"] = "can not delete this student";
         }
         
         return j;

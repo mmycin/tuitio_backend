@@ -53,4 +53,26 @@ class StudentRepository : public IRepository {
 
             return student;
         }
+
+        Student updateStudent(Student student) {}
+
+        bool deleteStudent(int id, int user_id) {
+            SQLite::Statement query(this->db, R"SQL(
+                DELETE FROM students
+                WHERE id = ? AND
+                user_id = ?
+                RETURNING *;
+            )SQL");
+            query.bind(1, id);
+            query.bind(2, user_id);
+
+            while (query.executeStep()) {
+                int id = query.getColumn(0);
+
+                if(id == 0) return false;
+                else return true;
+            }
+
+            return false;
+        }
 };
