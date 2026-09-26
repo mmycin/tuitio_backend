@@ -17,12 +17,23 @@ class StudentService : public IService {
     std::vector<Student> getUsers(string token) {
         auto id_opt = this->auth_manager->get_id(token);
         if(!id_opt) {
-            throw ValidationError("Token not found");
+            throw ValidationError("Token not found or expired");
         }
 
         int id = *id_opt;
 
         return this->repo->getStudents(id);
+    }
+
+    Student getStudentById(string token, int id) {
+        auto user_id_opt = this->auth_manager->get_id(token);
+        if(!user_id_opt) {
+            throw ValidationError("Token not found or expired");
+        }
+
+        int user_id = *user_id_opt;
+
+        return this->repo->getStudenById(user_id, id);
     }
 
   private:

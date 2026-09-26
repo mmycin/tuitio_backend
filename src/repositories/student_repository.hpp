@@ -34,4 +34,23 @@ class StudentRepository : public IRepository {
 
             return students;
         }
+
+        Student getStudenById(int user_id, int id) {
+            Student student;
+
+            SQLite::Statement query(this->db, R"SQL(
+                SELECT * FROM students
+                WHERE user_id = ? AND id = ?;
+            )SQL");
+            query.bind(1, user_id);
+            query.bind(2, id);
+
+            while(query.executeStep()) {
+                student.id = query.getColumn(0);
+                student.name = query.getColumn(2).getString();
+                student.fee = query.getColumn(3);
+            }
+
+            return student;
+        }
 };

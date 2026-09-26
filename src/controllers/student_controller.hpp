@@ -3,10 +3,10 @@
 #define _HAS_STD_BYTE 0
 
 #include "controllers/controller.hpp"
+#include "dtos/student_dto.hpp"
 #include "errors/api.hpp"
 #include "errors/validation.hpp"
 #include "models/students_model.hpp"
-#include "dtos/student_dto.hpp"
 #include "services/student_service.hpp"
 #include <httplib.h>
 #include <memory>
@@ -28,7 +28,7 @@ class StudentController : public IController {
         std::vector<Student> students = this->service->getUsers(token);
 
         std::vector<StudentResponse> student_res;
-        for(auto student: students) {
+        for (auto student : students) {
             student_res.push_back(StudentResponse(student));
         }
 
@@ -38,20 +38,17 @@ class StudentController : public IController {
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
-        string id_str = req.matches[1];
-        Validator::assertField(!id_str.empty(), "id", "Id is required");
+        string token = this->getTokenFromHeader(req);
+        int id = this->getIdFromRequest(req);
 
-        int itemId = 0;
-        try {
-            itemId = std::stoi(id_str);
-        } catch (const std::exception &) {
-            nlohmann::json details;
-            details["id"] =
-                nlohmann::json::array({ "Id must be a valid integer" });
-            throw ValidationError(details, "Validation failed");
+        Student student = this->service->getStudentById(token, id);
+
+        if (student.id == 0) {
+            sendError(res, 404, "Student not found for the user");
+        } else {
+            auto student_response = StudentResponse(student);
+            sendJson(res, 200, student_response.toJson());
         }
-
-        sendError(res, 405, "Method not implemented");
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {

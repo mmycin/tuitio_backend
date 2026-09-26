@@ -12,6 +12,8 @@ class Student {
 		string name;
 		int fee;
 
+		Student() = default;
+
 		Student(int id) : id(id), user(0) {}
 		Student(int id, User user, string name, int fee) : id(id), user(user), name(name), fee(fee) {}
 
