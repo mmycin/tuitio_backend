@@ -46,8 +46,8 @@ class CycleRepository : public IRepository {
 
         if (!ids.empty()) {
             query.bind(1, student_id);
-            for (size_t i = 1; i < ids.size(); ++i) {
-                query.bind(static_cast<int>(i + 1), ids[i]);
+            for (size_t i = 0; i < ids.size(); ++i) {
+                query.bind(static_cast<int>(i + 2), ids[i]);
             }
         } else {
             query.bind(1, student_id);

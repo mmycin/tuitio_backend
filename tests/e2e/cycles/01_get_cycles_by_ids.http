@@ -1,0 +1,8 @@
+GET http://localhost:5000/cycles
+Content-Type: application/json
+Authorization: Bearer 9fdc7ac33194823f7816b6fb.21b8c0284f2cd0cbcaf975c4.7faf4402fc1ca0b47471e8bbad6554d3
+
+{
+    "student_id": 1,
+    "ids": [3, 1, 2]
+}

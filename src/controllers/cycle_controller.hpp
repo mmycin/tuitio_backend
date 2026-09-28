@@ -1,8 +1,10 @@
 #pragma once
 
+#include <vector>
 #define _HAS_STD_BYTE 0
 
 #include "controllers/controller.hpp"
+#include "dtos/cycle_dto.hpp"
 #include "errors/api.hpp"
 #include "errors/validation.hpp"
 #include "services/cycle_service.hpp"
@@ -13,15 +15,28 @@
 using namespace std;
 
 class CycleController : public IController {
-private:
+  private:
     std::unique_ptr<CycleService> service;
 
-public:
+  public:
     explicit CycleController(std::unique_ptr<CycleService> service)
         : service(std::move(service)) {}
 
     void index(const httplib::Request &req, httplib::Response &res) override {
-        sendError(res, 405, "Method not allowed");
+        CyclesRequest request = json::parse(req.body);
+
+        auto cycles =
+            this->service->getCyclesByIDs(request.ids, request.student_id);
+
+        std::vector<GetCycleResponse> cycles_res;
+
+        for (auto cycle : cycles) {
+            cycles_res.push_back(GetCycleResponse(cycle));
+        }
+
+        auto cycles_response = GetCyclesResponse(cycles_res);
+
+        sendJson(res, 200, cycles_response.toJson());
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
@@ -33,7 +48,8 @@ public:
             itemId = std::stoi(id_str);
         } catch (const std::exception &) {
             nlohmann::json details;
-            details["id"] = nlohmann::json::array({"Id must be a valid integer"});
+            details["id"] =
+                nlohmann::json::array({ "Id must be a valid integer" });
             throw ValidationError(details, "Validation failed");
         }
 
