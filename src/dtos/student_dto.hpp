@@ -1,4 +1,6 @@
 #include "dtos/dto.hpp"
+#include "dtos/from_json_macros.hpp"
+#include "dtos/user_dto.hpp"
 #include "models/students_model.hpp"
 #include <nlohmann/json.hpp>
 #include <string>
@@ -55,7 +57,7 @@ class StudentsResponse : public IDTO {
     }
 };
 
-class DeleteStudentResponse : IDTO {
+class DeleteStudentResponse : public IDTO {
   public:
     bool success;
 
@@ -69,14 +71,58 @@ class DeleteStudentResponse : IDTO {
     json toJson() override {
         json j;
 
-        if(this->success) {
+        if (this->success) {
             j["sucess"] = true;
             j["message"] = "student deleted successfully";
         } else {
             j["sucess"] = false;
             j["error"] = "can not delete this student";
         }
-        
+
         return j;
+    }
+};
+
+class UpdateStudentRequest : public IDTO {
+  public:
+    int id = 0;
+    string name;
+    int fee;
+
+    UpdateStudentRequest() = default;
+
+    UpdateStudentRequest(int id, string name, int fee) {
+        this->id = id;
+        this->name = name;
+        this->fee = fee;
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        return json{};
+    }
+};
+
+FROM_JSON_OPTIONAL(UpdateStudentRequest, id, name, fee);
+
+class UpdateStudentResponse : public IDTO {
+  public:
+    Student student;
+
+    UpdateStudentResponse() = default;
+
+    UpdateStudentResponse(Student student) {
+        this->student = student;
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        auto student_dto = StudentResponse(this->student);
+        return json{
+            { "success", true },
+            { "student", student_dto.toJson() },
+        };
     }
 };

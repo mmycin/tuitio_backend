@@ -36,6 +36,19 @@ class StudentService : public IService {
         return this->repo->getStudenById(user_id, id);
     }
 
+    Student updateStudent(string token, Student student) {
+        auto user_id_opt = this->auth_manager->get_id(token);
+        if (!user_id_opt) {
+            throw ValidationError("Token not found or expired");
+        }
+
+        int user_id = *user_id_opt;
+
+        student.user.id = user_id;
+
+        return this->repo->updateStudent(student);
+    }
+
     bool deleteStudent(string token, int id) {
         auto user_id_opt = this->auth_manager->get_id(token);
         if (!user_id_opt) {

@@ -1,0 +1,8 @@
+PUT http://localhost:5000/students/3
+Content-Type: application/json
+Authorization: Bearer b73f0ce815238decac5b7895.19afa489baafafd34bcad3b9.a0ac0288066740fee675a270a1de3c44
+
+{
+    "name": "Karim Ullah",
+    "fee": 10000
+}

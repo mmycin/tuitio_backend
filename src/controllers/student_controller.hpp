@@ -4,8 +4,6 @@
 
 #include "controllers/controller.hpp"
 #include "dtos/student_dto.hpp"
-#include "errors/api.hpp"
-#include "errors/validation.hpp"
 #include "models/students_model.hpp"
 #include "services/student_service.hpp"
 #include <httplib.h>
@@ -56,7 +54,25 @@ class StudentController : public IController {
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {
-        sendError(res, 405, "Method not allowed");
+        string token = this->getTokenFromHeader(req);
+        int id = this->getIdFromRequest(req);
+
+        UpdateStudentRequest request = json::parse(req.body);
+
+        Student student;
+        student.id = id;
+        student.name = request.name;
+        student.fee = request.fee;
+
+        auto updated_student = this->service->updateStudent(token, student);
+
+        if (updated_student.id == 0) {
+            sendError(res, 501, "Can not update student");
+        } else {
+            auto response = UpdateStudentResponse(updated_student);
+
+            sendJson(res, 200, response.toJson());
+        }
     }
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {
@@ -65,7 +81,7 @@ class StudentController : public IController {
 
         bool success = this->service->deleteStudent(token, id);
 
-        if(success) {
+        if (success) {
             sendJson(res, 200, DeleteStudentResponse(success).toJson());
         } else {
             sendError(res, 501, "Can not delete this student");
