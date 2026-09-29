@@ -60,6 +60,18 @@ class StudentService : public IService {
         return this->repo->deleteStudent(id, user_id);
     }
 
+    Student createStudent(string token, Student student) {
+        auto user_id_opt = this->auth_manager->get_id(token);
+        if (!user_id_opt) {
+            throw ValidationError("Token not found or expired");
+        }
+
+        int user_id = *user_id_opt;
+        student.user.id = user_id;
+
+        return this->repo->createStudent(student);
+    }
+
   private:
     std::unique_ptr<StudentRepository> repo;
     std::unique_ptr<AuthManager> auth_manager;

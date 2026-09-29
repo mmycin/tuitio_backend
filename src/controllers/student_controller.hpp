@@ -50,7 +50,18 @@ class StudentController : public IController {
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {
-        sendError(res, 405, "Method not allowed");
+        string token = this->getTokenFromHeader(req);
+
+        CreateStudentRequest createReq = json::parse(req.body);
+        Student student;
+        student.name = createReq.name;
+        student.fee = createReq.fee;
+       Student createdStudent= this->service->createStudent(token, student);
+       if(createdStudent.id == 0) {
+           sendError(res, 501, "Can not create student");
+       } else {
+           sendJson(res, 200, CreateStudentResponse(createdStudent).toJson());
+       } 
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {

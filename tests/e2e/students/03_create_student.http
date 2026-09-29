@@ -1,3 +1,8 @@
-GET http://localhost:5000/students/80
+POST http://localhost:5000/students
 Content-Type: application/json
 Authorization: Bearer b73f0ce815238decac5b7895.19afa489baafafd34bcad3b9.a0ac0288066740fee675a270a1de3c44
+
+{
+    "name": "Mohammod Fazlul Karim",
+    "fee": 8000
+}

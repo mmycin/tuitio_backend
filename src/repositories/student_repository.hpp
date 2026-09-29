@@ -52,6 +52,25 @@ class StudentRepository : public IRepository {
         return student;
     }
 
+    Student createStudent(Student student) {
+        SQLite::Statement query(this->db, R"SQL(
+            INSERT INTO students
+            (user_id ,name,fee)
+            VALUES
+            (? , ? , ?)
+            RETURNING *;
+        )SQL");
+        query.bind(1, student.user.id);
+        query.bind(2, student.name);
+        query.bind(3, student.fee);
+
+        while (query.executeStep()) {
+            student.id = query.getColumn(0);
+        }
+
+        return student;
+    }
+
     Student updateStudent(Student student) {
         Student student_old = this->getStudenById(student.user.id, student.id);
 
@@ -69,7 +88,7 @@ class StudentRepository : public IRepository {
         query.bind(2, student.fee);
         query.bind(3, student.id);
 
-        while(query.executeStep()) {
+        while (query.executeStep()) {
             student.id = query.getColumn(0);
             student.user.id = query.getColumn(1);
             student.name = query.getColumn(2).getString();

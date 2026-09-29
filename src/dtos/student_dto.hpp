@@ -1,6 +1,7 @@
 #include "dtos/dto.hpp"
 #include "dtos/from_json_macros.hpp"
 #include "dtos/user_dto.hpp"
+#include "errors/validation.hpp"
 #include "models/students_model.hpp"
 #include <nlohmann/json.hpp>
 #include <string>
@@ -126,3 +127,52 @@ class UpdateStudentResponse : public IDTO {
         };
     }
 };
+
+class CreateStudentRequest : public IDTO {
+    public:
+        string name;
+        int fee;
+
+        CreateStudentRequest() = default;
+
+        CreateStudentRequest(string name, int fee) {
+            this->name = name;
+            this->fee = fee;
+            validate();
+        }
+
+        void validate() override {
+            Validator()
+                .check(!this->name.empty(), "name", "Name is required")
+                .check(this->fee != 0, "fee", "fee can not be null")
+                .validate();
+        }
+
+        json toJson() override {
+            return json{};
+        }
+
+};
+FROM_JSON(CreateStudentRequest,name ,fee);
+
+class CreateStudentResponse : public IDTO {
+    public:
+      Student student;
+  
+      CreateStudentResponse() = default;
+  
+      CreateStudentResponse(Student student) {
+          this->student = student;
+      }
+  
+      void validate() override {}
+  
+      json toJson() override {
+          auto student_dto = StudentResponse(this->student);
+          return json{
+              { "success", true },
+              { "student", student_dto.toJson() },
+          };
+      }
+};
+

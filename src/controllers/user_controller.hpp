@@ -41,8 +41,8 @@ class UserController : public IController {
 
         string token = this->getTokenFromHeader(req);
 
-        UpdateUserRequest updateReq;
-        json::parse(req.body).get_to(updateReq);        User user = this->service->updateUser(token, userId, updateReq);
+        UpdateUserRequest updateReq = json::parse(req.body);        
+        User user = this->service->updateUser(token, userId, updateReq);
 
         if(user.id == 0) {
             sendError(res, 501, "Can not update user");
