@@ -1,0 +1,7 @@
+PUT http://localhost:5000/cycles/240
+Content-Type: application/json
+Authorization: Bearer 848eccdb88898ddbb43c9643.a6099fe0abcfd7cddbb47503.02ba78466d591bdb9e5a9c404bd587f6
+
+{
+    "is_paid": true
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "controllers/student_controller.hpp"
 #include <vector>
 #define _HAS_STD_BYTE 0
 
@@ -61,7 +62,15 @@ class CycleController : public IController {
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {
-        sendError(res, 405, "Method not allowed");
+        int id = this->getIdFromRequest(req);
+
+        UpdateCycleRequest request = json::parse(req.body);
+
+        auto cycle = this->service->updateCycle(id, request.is_paid);
+
+        auto cycle_res = UpdateCycleResponse(cycle);
+
+        sendJson(res, 200, cycle_res.toJson());
     }
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {

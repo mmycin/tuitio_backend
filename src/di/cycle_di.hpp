@@ -13,11 +13,14 @@ private:
     std::unique_ptr<CycleService> service;
     std::unique_ptr<CycleController> controller;
     std::unique_ptr<CycleRouter> router;
+    std::unique_ptr<AuthManager> auth_manager;
+
 
 public:
     CycleDI() {
         repo = std::make_unique<CycleRepository>();
-        service = std::make_unique<CycleService>(std::move(repo));
+        service = std::make_unique<CycleService>(std::move(repo),
+                                                std::move(auth_manager));
         controller = std::make_unique<CycleController>(std::move(service));
         router = std::make_unique<CycleRouter>(*controller);
     }

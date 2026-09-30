@@ -77,12 +77,53 @@ class GetCyclesResponse : public IDTO {
         json j;
         j["cycles"] = nlohmann::json::array();
 
-        for(auto& cycle : cycles) {
+        for (auto &cycle : cycles) {
             j["cycles"].push_back(cycle.toJson());
         }
-        
+
         return j;
     }
 };
 
 FROM_JSON(CyclesRequest, student_id, ids);
+
+class UpdateCycleRequest : public IDTO {
+  public:
+    bool is_paid;
+
+    UpdateCycleRequest() = default;
+
+    UpdateCycleRequest(bool is_paid) {
+        this->is_paid = is_paid;
+        validate();
+    }
+
+    void validate() override {
+        Validator().validate();
+    }
+
+    json toJson() override {
+        return json{};
+    }
+};
+FROM_JSON(UpdateCycleRequest, is_paid);
+
+class UpdateCycleResponse : public IDTO {
+  public:
+    Cycle cycle;
+
+    UpdateCycleResponse() = default;
+
+    UpdateCycleResponse(Cycle cycle) {
+        this->cycle = cycle;
+    }
+
+    void validate() override {}
+
+    json toJson() override {
+        return json{
+            { "success", true },
+            { "cycle", GetCycleResponse(this->cycle).toJson() },
+        };
+    }
+};
