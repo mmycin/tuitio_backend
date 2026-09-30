@@ -1,9 +1,8 @@
 #pragma once
 
-#include "errors/api.hpp"
 #include "models/cycles_model.hpp"
 #include "repositories/repository.hpp"
-#include "spdlog/spdlog.h"
+#include "utils/time_utls.hpp"
 #include <SQLiteCpp/Statement.h>
 #include <chrono>
 #include <optional>
@@ -59,7 +58,7 @@ class CycleRepository : public IRepository {
             std::optional<std::chrono::system_clock::time_point> started_at_opt;
             if (!query.getColumn(2).isNull()) {
                 started_at_opt =
-                    sqliteToTimePoint(query.getColumn(2).getString());
+                    TimeConverter::sqliteToTimePoint(query.getColumn(2).getString());
             }
             auto started_at = *started_at_opt;
             int class_count = query.getColumn(3);
@@ -76,5 +75,25 @@ class CycleRepository : public IRepository {
         }
 
         return cycles;
+    }
+
+    Cycle createCycle(Cycle cycle) {
+        SQLite::Statement query(this->db, R"SQL(
+            INSERT INTO cycles
+            (student_id, started_at, class_count, is_paid)
+            VALUES
+            (?, ?, ?, false)
+            RETURNING *;
+        )SQL");
+        query.bind(1, cycle.student_id);
+        query.bind(2, TimeConverter::timePointToString(cycle.started_at));
+        query.bind(3, cycle.class_count);
+
+
+        while(query.executeStep()) {
+            cycle.id = query.getColumn(0);
+        }
+        
+        return cycle;
     }
 };

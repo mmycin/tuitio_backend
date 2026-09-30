@@ -1,8 +1,9 @@
 POST http://localhost:5000/students
 Content-Type: application/json
-Authorization: Bearer b73f0ce815238decac5b7895.19afa489baafafd34bcad3b9.a0ac0288066740fee675a270a1de3c44
+Authorization: Bearer 64123a4d216cd6f972b49e61.58e9be7cfc4b398c5710d2ee.d39281ad305bdb40331accd87478e097
 
 {
-    "name": "Mohammod Fazlul Karim",
-    "fee": 8000
+    "name": "Tony Tony Chopper",
+    "fee": 10000,
+    "class_count": 20
 }

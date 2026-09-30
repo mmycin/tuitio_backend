@@ -5,7 +5,9 @@
 #include "repositories/student_repository.hpp"
 #include "services/service.hpp"
 #include "utils/bearer_token.hpp"
+#include <chrono>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 class StudentService : public IService {
@@ -60,7 +62,7 @@ class StudentService : public IService {
         return this->repo->deleteStudent(id, user_id);
     }
 
-    Student createStudent(string token, Student student) {
+    std::tuple<Student, Cycle> createStudent(string token, Student student, Cycle cycle) {
         auto user_id_opt = this->auth_manager->get_id(token);
         if (!user_id_opt) {
             throw ValidationError("Token not found or expired");
@@ -69,7 +71,9 @@ class StudentService : public IService {
         int user_id = *user_id_opt;
         student.user.id = user_id;
 
-        return this->repo->createStudent(student);
+        cycle.started_at = std::chrono::system_clock::now();
+
+        return this->repo->createStudent(student, cycle);
     }
 
   private:

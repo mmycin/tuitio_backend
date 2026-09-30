@@ -1,8 +1,12 @@
 #pragma once
 
+#include "SQLiteCpp/Transaction.h"
+#include "models/cycles_model.hpp"
 #include "models/students_model.hpp"
+#include "repositories/cycle_repository.hpp"
 #include "repositories/repository.hpp"
 #include <SQLiteCpp/Statement.h>
+#include <tuple>
 #include <vector>
 
 using namespace std;
@@ -52,7 +56,7 @@ class StudentRepository : public IRepository {
         return student;
     }
 
-    Student createStudent(Student student) {
+    std::tuple<Student, Cycle> createStudent(Student student, Cycle cycle) {
         SQLite::Statement query(this->db, R"SQL(
             INSERT INTO students
             (user_id ,name,fee)
@@ -68,7 +72,11 @@ class StudentRepository : public IRepository {
             student.id = query.getColumn(0);
         }
 
-        return student;
+        CycleRepository cycle_repo;
+        cycle.student_id = student.id;
+        auto cycle_created = cycle_repo.createCycle(cycle);
+
+        return { student, cycle_created };
     }
 
     Student updateStudent(Student student) {

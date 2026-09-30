@@ -56,12 +56,17 @@ class StudentController : public IController {
         Student student;
         student.name = createReq.name;
         student.fee = createReq.fee;
-       Student createdStudent= this->service->createStudent(token, student);
-       if(createdStudent.id == 0) {
-           sendError(res, 501, "Can not create student");
-       } else {
-           sendJson(res, 200, CreateStudentResponse(createdStudent).toJson());
-       } 
+
+        Cycle cycle;
+        cycle.class_count = createReq.class_count;
+
+        auto [createdStudent, createdCycle] =
+            this->service->createStudent(token, student, cycle);
+        if (createdStudent.id == 0) {
+            sendError(res, 501, "Can not create student");
+        } else {
+            sendJson(res, 200, CreateStudentResponse(createdStudent, createdCycle).toJson());
+        }
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {
