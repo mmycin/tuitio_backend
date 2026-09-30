@@ -1,0 +1,9 @@
+POST http://localhost:5000/payments
+Content-Type: application/json
+Authorization: Bearer e609bc62d1ad5fb39d515b09.5b6744d19a8bf5fc7ac7813a.3fae8a4f9a5c66dfa3740e487f26fa8b
+
+{
+    "student_id": 4,
+    "amount": 15000,
+    "created_at": "2026-09-30 16:26:00"
+}

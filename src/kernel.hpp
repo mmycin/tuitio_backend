@@ -13,6 +13,7 @@
 #include "di/auth_di.hpp"
 #include "di/student_di.hpp"
 #include "di/cycle_di.hpp"
+#include "di/payment_di.hpp"
 
 #include "middlewares/auth.hpp"
 #include "middlewares/cors.hpp"
@@ -81,6 +82,7 @@ private:
         modules.push_back(std::make_unique<AuthDI>());
         modules.push_back(std::make_unique<StudentDI>());
         modules.push_back(std::make_unique<CycleDI>());
+        modules.push_back(std::make_unique<PaymentDI>());
     }
 
     void setupRoutes() {
