@@ -56,8 +56,9 @@ class PaymentController : public IController {
         Payment payment;
         payment.amount = paymentReq.amount;
         payment.student_id = paymentReq.student_id;
-        payment.created_at = TimeConverter::sqliteToTimePoint(paymentReq.created_at);
-        
+        payment.created_at =
+            TimeConverter::sqliteToTimePoint(paymentReq.created_at);
+
         auto payment_created = this->service->createPayment(payment);
         if (payment_created.id == 0) {
             sendError(res, 404, "Can not find payment");
