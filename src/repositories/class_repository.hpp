@@ -1,0 +1,10 @@
+#pragma once
+
+#include "errors/api.hpp"
+#include "spdlog/spdlog.h"
+#include <SQLiteCpp/Statement.h>
+#include "repositories/repository.hpp"
+
+using namespace std;
+
+class ClassRepository : public IRepository {};
