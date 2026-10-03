@@ -2,13 +2,16 @@
 
 #include "SQLiteCpp/Transaction.h"
 #include "errors/api.hpp"
+#include "models/classes_model.hpp"
 #include "models/cycles_model.hpp"
+#include "repositories/class_repository.hpp"
 #include "repositories/repository.hpp"
 #include "utils/time_utls.hpp"
 #include <SQLiteCpp/Statement.h>
 #include <chrono>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 using namespace std;
@@ -129,15 +132,65 @@ class CycleRepository : public IRepository {
         return cycle;
     }
 
+    int getClassCountFromCycleID(int id) {
+        int class_count;
+
+        SQLite::Statement query(this->db, R"SQL(
+            SELECT COUNT(*) AS class_count
+            FROM classes
+            WHERE cycle_id = id;
+        )SQL");
+        query.bind(1, id);
+
+        while (query.executeStep()) {
+            class_count = query.getColumn(0).getInt();
+        }
+
+        return class_count;
+    }
+
+  
+    std::tuple<Cycle, Cycle> splitCycle(Cycle oldCycle) {
+        SQLite::Transaction tx(this->db);
+        int actual_count = getClassCountFromCycleID(oldCycle.id);
+        int class_count = oldCycle.class_count;
+
+        if (actual_count <= class_count) {
+            tx.commit();
+            return { oldCycle, Cycle() };
+        }
+
+        Cycle newCycle;
+        newCycle.student_id = oldCycle.student_id;
+        newCycle.class_count = oldCycle.class_count;
+        newCycle.is_paid = false;
+        newCycle.started_at = chrono::system_clock::now();
+
+        auto newCycleCreated = this->createCycle(newCycle);
+
+        int extraClasseCount = actual_count - class_count;
+
+        ClassRepository classRepo;
+        std::vector<Class> remainingClasses = classRepo.getRemainingClasses(oldCycle.id, extraClasseCount);
+
+        for(auto& remainingClass: remainingClasses) {
+            auto is_updated = classRepo.updateCycleID(remainingClass, newCycleCreated.id);
+            if(is_updated == false) {
+                throw ApiError("Can not create new cycle for remaining classes", 501);
+            }
+        }
+        
+        tx.commit();
+        return { oldCycle, newCycle };
+    }
 
     Cycle updateCycle(int id, bool is_paid) {
         SQLite::Transaction tx(this->db);
         Cycle cycle = getCycleByID(id);
 
-        if(cycle.id == 0) {
+        if (cycle.id == 0) {
             throw NotFoundError("Cycle not found by id");
         }
-
 
         SQLite::Statement query(this->db, R"SQL(
             UPDATE cycles
@@ -150,6 +203,15 @@ class CycleRepository : public IRepository {
 
         while (query.executeStep()) {
             cycle.is_paid = query.getColumn(0).getInt() != 0;
+        }
+
+        if (is_paid == true) {
+            auto [oldCycle, newCycle] = splitCycle(cycle);
+            if(newCycle.id == 0) {
+                throw ApiError("Something went wrong while updating cycle", 501);
+            } else {
+                cycle = newCycle;
+            }
         }
 
         tx.commit();
