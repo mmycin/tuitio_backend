@@ -14,6 +14,7 @@
 #include "di/student_di.hpp"
 #include "di/cycle_di.hpp"
 #include "di/payment_di.hpp"
+#include "di/class_di.hpp"
 
 #include "middlewares/auth.hpp"
 #include "middlewares/cors.hpp"
@@ -83,12 +84,21 @@ private:
         modules.push_back(std::make_unique<StudentDI>());
         modules.push_back(std::make_unique<CycleDI>());
         modules.push_back(std::make_unique<PaymentDI>());
+        modules.push_back(std::make_unique<ClassDI>());
     }
 
     void setupRoutes() {
         for (auto &module : modules) {
             module->registerRoutes(server);
         }
+
+        server.Get("/health", [](const httplib::Request &req, httplib::Response &res) {
+            json response;
+            response["succes"] = true;
+            response["message"] = "Connected successfully";
+
+            res.set_content(response.dump(), "application/json");
+        });
     }
 
 public:
