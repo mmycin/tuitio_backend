@@ -26,6 +26,12 @@ class UserController : public IController {
 
     void show(const httplib::Request &req, httplib::Response &res) override {
         int userId = getIdFromRequest(req);
+        string token = this->getTokenFromHeader(req);
+        AuthManager auth_mgr;
+        auto auth_id = auth_mgr.get_id(token);
+        if (!auth_id || *auth_id != static_cast<uint64_t>(userId)) {
+            throw UnauthorizedError("You are not authorized to view this user profile");
+        }
 
         auto user = service->getUserById(userId);
         auto user_dto = GetUserResponse::fromUser(user);

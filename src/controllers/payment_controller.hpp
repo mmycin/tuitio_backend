@@ -28,6 +28,7 @@ class PaymentController : public IController {
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         string id_str = req.matches[1];
         Validator::assertField(!id_str.empty(), "id", "Id is required");
 
@@ -41,7 +42,7 @@ class PaymentController : public IController {
             throw ValidationError(details, "Validation failed");
         }
 
-        auto payment = this->service->getPaymentByID(itemId);
+        auto payment = this->service->getPaymentByID(token, itemId);
         if (payment.id == 0) {
             sendError(res, 404, "Can not find payment");
         } else {
@@ -51,6 +52,7 @@ class PaymentController : public IController {
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         CreatePaymentRequest paymentReq = json::parse(req.body);
 
         Payment payment;
@@ -59,7 +61,7 @@ class PaymentController : public IController {
         payment.created_at =
             TimeConverter::sqliteToTimePoint(paymentReq.created_at);
 
-        auto payment_created = this->service->createPayment(payment);
+        auto payment_created = this->service->createPayment(token, payment);
         if (payment_created.id == 0) {
             sendError(res, 404, "Can not find payment");
         } else {

@@ -37,7 +37,7 @@ class StudentRepository : public IRepository {
         return students;
     }
 
-    Student getStudenById(int user_id, int id) {
+    Student getStudentById(int user_id, int id) {
         Student student;
 
         SQLite::Statement query(this->db, R"SQL(
@@ -49,6 +49,7 @@ class StudentRepository : public IRepository {
 
         while (query.executeStep()) {
             student.id = query.getColumn(0);
+            student.user.id = query.getColumn(1);
             student.name = query.getColumn(2).getString();
             student.fee = query.getColumn(3);
         }
@@ -56,12 +57,18 @@ class StudentRepository : public IRepository {
         return student;
     }
 
+    Student getStudenById(int user_id, int id) {
+        return getStudentById(user_id, id);
+    }
+
     std::tuple<Student, Cycle> createStudent(Student student, Cycle cycle) {
+        SQLite::Transaction tx(this->db);
+
         SQLite::Statement query(this->db, R"SQL(
             INSERT INTO students
-            (user_id ,name,fee)
+            (user_id, name, fee)
             VALUES
-            (? , ? , ?)
+            (?, ?, ?)
             RETURNING *;
         )SQL");
         query.bind(1, student.user.id);
@@ -76,11 +83,15 @@ class StudentRepository : public IRepository {
         cycle.student_id = student.id;
         auto cycle_created = cycle_repo.createCycle(cycle);
 
+        tx.commit();
         return { student, cycle_created };
     }
 
     Student updateStudent(Student student) {
-        Student student_old = this->getStudenById(student.user.id, student.id);
+        Student student_old = this->getStudentById(student.user.id, student.id);
+        if (student_old.id == 0) {
+            return Student();
+        }
 
         if (student.name.empty())
             student.name = student_old.name;
@@ -90,11 +101,13 @@ class StudentRepository : public IRepository {
         SQLite::Statement query(this->db, R"SQL(
                 UPDATE students
                 SET name = ?, fee = ?
-                WHERE id = ?;
+                WHERE id = ? AND user_id = ?
+                RETURNING *;
             )SQL");
         query.bind(1, student.name);
         query.bind(2, student.fee);
         query.bind(3, student.id);
+        query.bind(4, student.user.id);
 
         while (query.executeStep()) {
             student.id = query.getColumn(0);

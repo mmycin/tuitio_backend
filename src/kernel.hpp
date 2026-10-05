@@ -94,7 +94,7 @@ private:
 
         server.Get("/health", [](const httplib::Request &req, httplib::Response &res) {
             json response;
-            response["succes"] = true;
+            response["success"] = true;
             response["message"] = "Connected successfully";
 
             res.set_content(response.dump(), "application/json");
@@ -120,7 +120,7 @@ public:
 
     void start(const std::string &host, int port) {
         spdlog::info("   Server starting...");
-        spdlog::info("   Env : {}", AppConfig::APP_ENV);
+        spdlog::info("   Env : {}", AppConfig::APP_ENV());
         spdlog::info("   Host : {}", host);
         spdlog::info("   Port : {}", port);
         spdlog::info("   URL  : http://{}:{}", host, port);

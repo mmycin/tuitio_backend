@@ -44,13 +44,13 @@ class UserService : public IService {
         auto userId_opt = this->auth_manager->get_id(token);
         if (!userId_opt) {
             throw UnauthorizedError(
-                "You are not authenticated to delete the user");
+                "You are not authenticated to update the user");
         }
         int userId = *userId_opt;
 
         if (userId != id) {
             throw ValidationError(
-                "Your requested user can not be deleted by you");
+                "Your requested user can not be updated by you");
         }
 
         if (req.password != "") {

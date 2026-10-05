@@ -98,7 +98,7 @@ private:
   // ---- helpers ------------------------------------------------------------
 
   static vector<unsigned char> load_key() {
-    string secret = SecretConfig::SECRET_KEY;
+    string secret = SecretConfig::SECRET_KEY();
     vector<unsigned char> key(32, 0);
     size_t copy_len = min(secret.size(), size_t{32});
     for (size_t i = 0; i < copy_len; ++i)

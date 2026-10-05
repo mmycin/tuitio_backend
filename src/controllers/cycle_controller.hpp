@@ -24,10 +24,11 @@ class CycleController : public IController {
         : service(std::move(service)) {}
 
     void index(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         CyclesRequest request = json::parse(req.body);
 
         auto cycles =
-            this->service->getCyclesByIDs(request.ids, request.student_id);
+            this->service->getCyclesByIDs(token, request.ids, request.student_id);
 
         std::vector<GetCycleResponse> cycles_res;
 
@@ -62,11 +63,12 @@ class CycleController : public IController {
     }
 
     void update(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         int id = this->getIdFromRequest(req);
 
         UpdateCycleRequest request = json::parse(req.body);
 
-        auto cycle = this->service->updateCycle(id, request.is_paid);
+        auto cycle = this->service->updateCycle(token, id, request.is_paid);
 
         auto cycle_res = UpdateCycleResponse(cycle);
 

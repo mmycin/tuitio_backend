@@ -7,6 +7,8 @@
 #include "controllers/class_controller.hpp"
 #include "routers/class_router.hpp"
 
+#include "utils/bearer_token.hpp"
+
 class ClassDI : public IDI {
 private:
     std::unique_ptr<ClassRepository> repo;
@@ -17,7 +19,8 @@ private:
 public:
     ClassDI() {
         repo = std::make_unique<ClassRepository>();
-        service = std::make_unique<ClassService>(std::move(repo));
+        auto auth_manager = std::make_unique<AuthManager>();
+        service = std::make_unique<ClassService>(std::move(repo), std::move(auth_manager));
         controller = std::make_unique<ClassController>(std::move(service));
         router = std::make_unique<ClassRouter>(*controller);
     }

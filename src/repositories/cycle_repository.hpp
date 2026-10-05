@@ -60,12 +60,11 @@ class CycleRepository : public IRepository {
         while (query.executeStep()) {
             int id = query.getColumn(0);
             int student_id = query.getColumn(1);
-            std::optional<std::chrono::system_clock::time_point> started_at_opt;
+            std::chrono::system_clock::time_point started_at{};
             if (!query.getColumn(2).isNull()) {
-                started_at_opt = TimeConverter::sqliteToTimePoint(
+                started_at = TimeConverter::sqliteToTimePoint(
                     query.getColumn(2).getString());
             }
-            auto started_at = *started_at_opt;
             int class_count = query.getColumn(3);
             bool is_paid = query.getColumn(4).getInt() != 0;
 
@@ -94,12 +93,11 @@ class CycleRepository : public IRepository {
         while (query.executeStep()) {
             int id = query.getColumn(0);
             int student_id = query.getColumn(1);
-            std::optional<std::chrono::system_clock::time_point> started_at_opt;
+            std::chrono::system_clock::time_point started_at{};
             if (!query.getColumn(2).isNull()) {
-                started_at_opt = TimeConverter::sqliteToTimePoint(
+                started_at = TimeConverter::sqliteToTimePoint(
                     query.getColumn(2).getString());
             }
-            auto started_at = *started_at_opt;
             int class_count = query.getColumn(3);
             bool is_paid = query.getColumn(4).getInt() != 0;
 
@@ -133,7 +131,7 @@ class CycleRepository : public IRepository {
     }
 
     int getClassCountFromCycleID(int id) {
-        int class_count;
+        int class_count = 0;
 
         SQLite::Statement query(this->db, R"SQL(
             SELECT COUNT(*) AS class_count

@@ -5,7 +5,7 @@
 int main() {
     dotenv::init();
     AppContainer app;
-    app.start(AppConfig::APP_HOST, AppConfig::APP_PORT);
+    app.start(AppConfig::APP_HOST(), AppConfig::APP_PORT());
 
     return 0;
 }

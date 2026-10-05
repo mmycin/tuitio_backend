@@ -24,9 +24,10 @@ class ClassController : public IController {
         : service(std::move(service)) {}
 
     void index(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         GetClassByCycleRequest request = json::parse(req.body);
 
-        auto classes = this->service->getClassesByCycleID(request.cycle_id);
+        auto classes = this->service->getClassesByCycleID(token, request.cycle_id);
 
         std::vector<GetClassResponse> classes_res;
 
@@ -38,8 +39,9 @@ class ClassController : public IController {
     }
 
     void show(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         int id = this->getIdFromRequest(req);
-        auto class_ = this->service->getClassByID(id);
+        auto class_ = this->service->getClassByID(token, id);
         if (class_.id == 0) {
             sendError(res, 404, "Can not find class");
         } else {
@@ -48,6 +50,7 @@ class ClassController : public IController {
     }
 
     void create(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         CreateClassRequest request = json::parse(req.body);
 
         Class inputClass;
@@ -56,7 +59,7 @@ class ClassController : public IController {
             TimeConverter::sqliteToTimePoint(request.created_at);
         inputClass.notes = request.notes;
 
-        auto outputClass = this->service->createClass(inputClass);
+        auto outputClass = this->service->createClass(token, inputClass);
         if (outputClass.id == 0) {
             sendError(res, 404, "Can not find class");
         } else {
@@ -69,9 +72,10 @@ class ClassController : public IController {
     }
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {
+        string token = this->getTokenFromHeader(req);
         int id = this->getIdFromRequest(req);
 
-        auto is_deleted = this->service->deleteClass(id);
+        auto is_deleted = this->service->deleteClass(token, id);
 
         if (is_deleted) {
             sendJson(res, 200, DeleteClassResponse(is_deleted).toJson());

@@ -3,9 +3,10 @@
 #include <string>
 #include "utils/env.hpp"
 
-using namespace std;
-
 class SecretConfig {
-	public:
-		inline static const string SECRET_KEY = getEnv("SECRET_KEY");
-};
+  public:
+    static const std::string &SECRET_KEY() {
+        static const std::string key = getEnv("SECRET_KEY");
+        return key;
+    }
+};
