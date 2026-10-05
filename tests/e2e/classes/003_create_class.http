@@ -1,0 +1,9 @@
+POST http://localhost:5000/classes
+Content-Type: application/json
+Authorization: Bearer 57e9fe398328e62b40efecff.13a45c403aa972bf954713b0.993b663736e5cb044b037d09ba6d50c0
+
+{
+    "cycle_id": 1,
+    "created_at": "2026-10-5 16:26:00",
+    "notes": "chapter - 17"
+}
