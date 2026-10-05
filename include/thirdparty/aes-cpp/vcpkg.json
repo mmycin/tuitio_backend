@@ -1,0 +1,13 @@
+{
+  "name": "aes-cpp",
+  "version-string": "0.2.1",
+  "dependencies": [],
+  "features": {
+    "tests": {
+      "description": "Build tests",
+      "dependencies": [
+        "gtest"
+      ]
+    }
+  }
+}

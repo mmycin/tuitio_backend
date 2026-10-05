@@ -1,0 +1,117 @@
+
+
+name: CI-Linux
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+      - stable
+  pull_request:
+    branches:
+      - main
+      - release/**
+      - codex/**
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        std: [11, 17]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Code style (check only)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-17
+          files="$(git ls-files '*.h' '*.hpp' '*.c' '*.cc' '*.cpp' || true)"
+          [ -n "$files" ] && clang-format-17 -style=file -n --Werror $files
+
+      - name: Build gtest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgtest-dev cmake
+          cd /usr/src/gtest
+          sudo cmake CMakeLists.txt
+          sudo make
+          sudo cp lib/*.a /usr/lib
+      
+      - name: Tests
+        run: |
+          STD=${{ matrix.std }}
+          TEST_STD=$([ "$STD" -lt 14 ] && echo 14 || echo $STD)
+          make workflow_build_test FLAGS="-Wall -Wextra -I./include -std=c++$STD" TEST_FLAGS="-Wall -Wextra -I./include -std=c++$TEST_STD"
+          ./bin/test
+
+      
+      - name: Speed test
+        run: |
+          make workflow_build_speed_test FLAGS="-Wall -Wextra -I./include -std=c++${{ matrix.std }}"
+          ./bin/speedtest
+      - name: GF_Multiply constant-time check
+        if: runner.os == 'Linux'
+        run: bash dev/gf_multiply_branch_check.sh
+
+  vcpkg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+          ./vcpkg/vcpkg install --x-feature=tests
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_MANIFEST_FEATURES=tests -DAES_CPP_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build
+
+      - name: GF_Multiply constant-time check
+        run: bash dev/gf_multiply_branch_check.sh
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build gtest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgtest-dev cmake
+          cd /usr/src/gtest
+          sudo cmake CMakeLists.txt
+          sudo make
+          sudo cp lib/*.a /usr/lib
+      - name: Tests with sanitizers
+        run: |
+          make workflow_build_test FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1 -Wall -Wextra -I./include -std=c++17" TEST_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1 -Wall -Wextra -I./include -std=c++17"
+          ASAN_OPTIONS=detect_leaks=1 ./bin/test
+      - name: GF_Multiply constant-time check
+        run: bash dev/gf_multiply_branch_check.sh
+
+  macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          cmake -S . -B build -DAES_CPP_BUILD_TESTS=ON -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
+          cmake --build build
+          ctest --test-dir build
+      - name: GF_Multiply constant-time check
+        run: bash dev/gf_multiply_branch_check.sh
+      
+      
+      
+
+
+
+
