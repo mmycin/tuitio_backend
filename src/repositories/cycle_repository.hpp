@@ -138,7 +138,7 @@ class CycleRepository : public IRepository {
         SQLite::Statement query(this->db, R"SQL(
             SELECT COUNT(*) AS class_count
             FROM classes
-            WHERE cycle_id = id;
+            WHERE cycle_id = ?;
         )SQL");
         query.bind(1, id);
 
@@ -167,6 +167,9 @@ class CycleRepository : public IRepository {
         newCycle.started_at = chrono::system_clock::now();
 
         auto newCycleCreated = this->createCycle(newCycle);
+        if(newCycleCreated.id == 0) {
+            throw ApiError("Can not properly create new cycle", 501);
+        }
 
         int extraClasseCount = actual_count - class_count;
 
@@ -181,11 +184,10 @@ class CycleRepository : public IRepository {
         }
         
         tx.commit();
-        return { oldCycle, newCycle };
+        return { oldCycle, newCycleCreated };
     }
 
     Cycle updateCycle(int id, bool is_paid) {
-        SQLite::Transaction tx(this->db);
         Cycle cycle = getCycleByID(id);
 
         if (cycle.id == 0) {
@@ -208,13 +210,12 @@ class CycleRepository : public IRepository {
         if (is_paid == true) {
             auto [oldCycle, newCycle] = splitCycle(cycle);
             if(newCycle.id == 0) {
-                throw ApiError("Something went wrong while updating cycle", 501);
+                spdlog::info("No new cycle created");
             } else {
                 cycle = newCycle;
+                spdlog::info("New cycle created");
             }
         }
-
-        tx.commit();
 
         return cycle;
     }

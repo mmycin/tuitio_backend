@@ -30,9 +30,9 @@ class CreateClassRequest : public IDTO {
     void validate() override {
         Validator()
             .check(this->cycle_id != 0, "cycle_id", "cycle_id can not be null")
-            .check(this->created_at.empty(), "created_at",
+            .check(!this->created_at.empty(), "created_at",
                    "created_at can not be null")
-            .check(this->notes.empty(), "notes", "notes can be empty")
+            .check(!this->notes.empty(), "notes", "notes can be empty")
             .validate();
     }
 
