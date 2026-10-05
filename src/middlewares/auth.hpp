@@ -27,7 +27,8 @@ inline void useAuth(httplib::Server &server) {
 
         std::string token = auth_header.substr(7);
         AuthManager auth_mgr;
-        if (!auth_mgr.get_id(token)) {
+        auto user_id = auth_mgr.get_id(token);
+        if (!user_id) {
             res.status = 401;
             nlohmann::json error;
             error["status"] = 401;
@@ -36,6 +37,7 @@ inline void useAuth(httplib::Server &server) {
             return httplib::Server::HandlerResponse::Handled;
         }
 
+        const_cast<httplib::Request&>(req).set_header("X-User-Id", std::to_string(*user_id));
         return httplib::Server::HandlerResponse::Unhandled;
     });
 }

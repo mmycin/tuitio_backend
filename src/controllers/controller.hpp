@@ -50,6 +50,9 @@ class IController {
     }
 
     std::string getTokenFromHeader(const httplib::Request &req) {
+        if (req.has_header("X-User-Id")) {
+            return "user_id:" + req.get_header_value("X-User-Id");
+        }
         string auth_header = req.get_header_value("Authorization");
         string token = "";
 

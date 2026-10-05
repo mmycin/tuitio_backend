@@ -31,22 +31,22 @@ class AuthService : public IService {
         }
     }
 
+    // verifyUser: token already validated by auth middleware.
+    // Read the pre-injected X-User-Id header instead of re-decrypting.
     User verifyUser(const httplib::Request &req) {
-        string auth_header = req.get_header_value("Authorization");
-        string token = "";
-
-        if (auth_header.rfind("Bearer ", 0) == 0 && auth_header.size() > 7) {
-            token = auth_header.substr(7);
-        } else {
-            throw UnauthorizedError("Invalid or missing Authorization header format");
-        }
-
-        auto id = this->auth_manager->get_id(token);
-        if (!id) {
+        std::string user_id_hdr = req.get_header_value("X-User-Id");
+        if (user_id_hdr.empty()) {
             throw UnauthorizedError("Invalid or expired token");
         }
 
-        User user = this->repo->getUserById(*id);
+        uint64_t id = 0;
+        try {
+            id = std::stoull(user_id_hdr);
+        } catch (...) {
+            throw UnauthorizedError("Invalid authentication context");
+        }
+
+        User user = this->repo->getUserById(static_cast<int>(id));
         if (user.id == 0) {
             throw NotFoundError("User not found");
         }

@@ -6,51 +6,34 @@
 #include "password_hash.hpp"
 #include "repositories/user_repository.hpp"
 #include "services/service.hpp"
-#include "utils/bearer_token.hpp"
+#include <cstdint>
 #include <memory>
 
 class UserService : public IService {
   public:
-    explicit UserService(std::unique_ptr<UserRepository> repo,
-                         std::unique_ptr<AuthManager> auth_manager)
-        : repo(std::move(repo)), auth_manager(std::move(auth_manager)) {}
+    explicit UserService(std::unique_ptr<UserRepository> repo)
+        : repo(std::move(repo)) {}
 
     User getUserById(int id) {
         User user = this->repo->getUserById(id);
         if (user.id == 0) {
-            throw NotFoundError("User not found with id: " +
-                                std::to_string(id));
+            throw NotFoundError("User not found with id: " + std::to_string(id));
         }
         return user;
     }
 
-    bool deleteUserById(string token, int id) {
-        auto userId_opt = this->auth_manager->get_id(token);
-        if (!userId_opt) {
-            throw UnauthorizedError(
-                "You are not authenticated to delete the user");
+    // authId is the user id extracted by the auth middleware (already validated).
+    bool deleteUserById(uint64_t authId, int id) {
+        if (static_cast<int>(authId) != id) {
+            throw ValidationError("Your requested user can not be deleted by you");
         }
-        int userId = *userId_opt;
-
-        if (userId != id) {
-            throw ValidationError(
-                "Your requested user can not be deleted by you");
-        }
-
         return this->repo->deleteUser(id);
     }
 
-    User updateUser(string token, int id, UpdateUserRequest &req) {
-        auto userId_opt = this->auth_manager->get_id(token);
-        if (!userId_opt) {
-            throw UnauthorizedError(
-                "You are not authenticated to update the user");
-        }
-        int userId = *userId_opt;
-
-        if (userId != id) {
-            throw ValidationError(
-                "Your requested user can not be updated by you");
+    // authId is the user id extracted by the auth middleware (already validated).
+    User updateUser(uint64_t authId, int id, UpdateUserRequest &req) {
+        if (static_cast<int>(authId) != id) {
+            throw ValidationError("Your requested user can not be updated by you");
         }
 
         if (req.password != "") {
@@ -62,5 +45,4 @@ class UserService : public IService {
 
   private:
     std::unique_ptr<UserRepository> repo;
-    std::unique_ptr<AuthManager> auth_manager;
 };

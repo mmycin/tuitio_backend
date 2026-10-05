@@ -6,7 +6,6 @@
 #include "routers/user_router.hpp"
 #include "services/user_service.hpp"
 #include <memory>
-#include "bearer_token.hpp"
 
 
 class UserDI : public IDI {
@@ -15,16 +14,13 @@ class UserDI : public IDI {
     std::unique_ptr<UserService> service;
     std::unique_ptr<UserController> controller;
     std::unique_ptr<UserRouter> router;
-    std::unique_ptr<AuthManager> auth_manager;
 
   public:
     UserDI() {
-        repo = std::make_unique<UserRepository>();
-        auth_manager = std::make_unique<AuthManager>();
-        service = std::make_unique<UserService>(std::move(repo),
-                                                std::move(auth_manager));
+        repo       = std::make_unique<UserRepository>();
+        service    = std::make_unique<UserService>(std::move(repo));
         controller = std::make_unique<UserController>(std::move(service));
-        router = std::make_unique<UserRouter>(*controller);
+        router     = std::make_unique<UserRouter>(*controller);
     }
 
     void registerRoutes(httplib::Server &server) override {

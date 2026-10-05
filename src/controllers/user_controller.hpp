@@ -16,6 +16,20 @@ class UserController : public IController {
   private:
     std::unique_ptr<UserService> service;
 
+    // Read the authenticated user id injected by the auth middleware.
+    // The middleware already validated the token and stored the id in X-User-Id.
+    uint64_t getAuthUserId(const httplib::Request &req) {
+        std::string hdr = req.get_header_value("X-User-Id");
+        if (hdr.empty()) {
+            throw UnauthorizedError("Missing authentication context");
+        }
+        try {
+            return std::stoull(hdr);
+        } catch (...) {
+            throw UnauthorizedError("Invalid authentication context");
+        }
+    }
+
   public:
     explicit UserController(std::unique_ptr<UserService> service)
         : service(std::move(service)) {}
@@ -26,10 +40,9 @@ class UserController : public IController {
 
     void show(const httplib::Request &req, httplib::Response &res) override {
         int userId = getIdFromRequest(req);
-        string token = this->getTokenFromHeader(req);
-        AuthManager auth_mgr;
-        auto auth_id = auth_mgr.get_id(token);
-        if (!auth_id || *auth_id != static_cast<uint64_t>(userId)) {
+        uint64_t authId = getAuthUserId(req);
+
+        if (authId != static_cast<uint64_t>(userId)) {
             throw UnauthorizedError("You are not authorized to view this user profile");
         }
 
@@ -44,13 +57,12 @@ class UserController : public IController {
 
     void update(const httplib::Request &req, httplib::Response &res) override {
         int userId = getIdFromRequest(req);
+        uint64_t authId = getAuthUserId(req);
 
-        string token = this->getTokenFromHeader(req);
+        UpdateUserRequest updateReq = json::parse(req.body);
+        User user = this->service->updateUser(authId, userId, updateReq);
 
-        UpdateUserRequest updateReq = json::parse(req.body);        
-        User user = this->service->updateUser(token, userId, updateReq);
-
-        if(user.id == 0) {
+        if (user.id == 0) {
             sendError(res, 501, "Can not update user");
         } else {
             sendJson(res, 200, UpdateUserResponse(true, user).toJson());
@@ -59,10 +71,9 @@ class UserController : public IController {
 
     void destroy(const httplib::Request &req, httplib::Response &res) override {
         int userId = getIdFromRequest(req);
+        uint64_t authId = getAuthUserId(req);
 
-        string token = this->getTokenFromHeader(req);
-
-        bool isDeleted = this->service->deleteUserById(token, userId);
+        bool isDeleted = this->service->deleteUserById(authId, userId);
 
         if (isDeleted) {
             sendJson(res, 200, DeleteUserResponse(isDeleted).toJson());
